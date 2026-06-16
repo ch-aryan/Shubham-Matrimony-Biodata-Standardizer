@@ -24,4 +24,9 @@ public class BiodataController {
                 request.getRawText()
         );
     }
+    @GetMapping("/health")
+    public String check(){
+        System.out.println("bio data is working");
+        return "aryan here";
+    }
 }

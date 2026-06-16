@@ -76,4 +76,39 @@ public class BiodataLabels {
             "mother name",
             "mother's name"
     );
+
+
+    public static final Set<String> CASTE = Set.of(
+            "caste",
+            "community",
+            "kulam"
+    );
+
+    public static final Set<String> GOTHRAM = Set.of(
+            "gothram",
+            "gotra"
+
+    );
+
+    public static final Set<String> RASHI = Set.of(
+            "rashi"
+    );
+
+    public static final Set<String> NAKSHATRAM = Set.of(
+            "nakshatram",
+            "star"
+    );
+
+    public static final Set<String> SALARY = Set.of(
+            "salary",
+            "income",
+            "annual income",
+            "ctc"
+    );
+
+    public static final Set<String> COMPANY = Set.of(
+            "company",
+            "organization",
+            "employer"
+    );
 }
