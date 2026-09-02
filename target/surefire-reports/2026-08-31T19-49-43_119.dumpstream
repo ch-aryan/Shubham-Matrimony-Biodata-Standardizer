@@ -1,0 +1,5 @@
+# Created at 2026-08-31T19:49:43.341
+Boot Manifest-JAR contains absolute paths in classpath 'D:\shubham-biodata-format\Shubham_matrimony_Biodata\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+

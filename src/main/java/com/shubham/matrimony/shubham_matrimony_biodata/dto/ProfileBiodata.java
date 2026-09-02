@@ -1,6 +1,5 @@
 package com.shubham.matrimony.shubham_matrimony_biodata.dto;
 
-
 import lombok.Data;
 
 @Data
@@ -16,7 +15,6 @@ public class ProfileBiodata {
     private String nativePlace;
 
     private String height;
-    private String maritalStatus;
 
     // Horoscope Details
     private String caste;
@@ -26,7 +24,6 @@ public class ProfileBiodata {
 
     // Education & Career
     private String qualification;
-    private String collegeOrInstitute;
 
     private String occupation;
     private String company;

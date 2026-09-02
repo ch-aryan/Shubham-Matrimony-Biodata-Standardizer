@@ -11,21 +11,25 @@ public class BiodataController {
 
     private final BiodataServiceParser biodataService;
 
-
     public BiodataController(BiodataServiceParser biodataService) {
         this.biodataService = biodataService;
     }
 
     @PostMapping("/parse")
-    public ProfileBiodata parse(
-            @RequestBody ParseRequest request) {
+    public ProfileBiodata parse(@RequestBody ParseRequest request) {
 
         return biodataService.parse(
-                request.getRawText()
-        );
+                request.getRawText());
     }
+
+    @PostMapping("/parseraw")
+    public ProfileBiodata parse(@RequestBody String rawText) {
+
+        return biodataService.parse(rawText);
+    }
+
     @GetMapping("/health")
-    public String check(){
+    public String check() {
         System.out.println("bio data is working");
         return "aryan here";
     }

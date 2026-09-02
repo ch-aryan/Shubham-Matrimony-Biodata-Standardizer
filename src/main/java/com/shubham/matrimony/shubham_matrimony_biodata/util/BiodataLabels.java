@@ -4,111 +4,374 @@ import java.util.Set;
 
 public class BiodataLabels {
 
-    private BiodataLabels() {
-    }
+        private BiodataLabels() {
+        }
 
-    public static final Set<String> FULL_NAME = Set.of(
-            "name",
-            "full name",
-            "surname",
-            "middle name",
-            "bride name",
-            "groom name",
-            "abbai peru",
-            "ammai peru",
-            "peru",
-            "inti peru",
-            "enti peru"
-    );
+        public static final Set<String> SURNAME = Set.of(
+                        "surname",
+                        "inti peru",
+                        "inti_peru",
+                        "enti peru",
+                        "last name",
+                        "ఇంటి పేరు",
+                        "ఇంటిపేరు");
 
-    public static final Set<String> DATE_OF_BIRTH = Set.of(
-            "date of birth",
-            "putinadinam",
-            "dob",
-            "birth date"
-    );
+        public static final Set<String> FULL_NAME = Set.of(
+                        "full name",
+                        "fullname",
+                        "bride name",
+                        "groom name",
+                        "candidate name",
+                        "person name",
+                        "boy name",
+                        "girl name",
+                        "abbai peru",
+                        "abbayi peru",
+                        "ammai peru",
+                        "ammayi peru",
+                        "first name",
+                        "middle name",
+                        "chi.la.sou",
+                        "chi.la.sow",
+                        "chi.",
+                        "chi",
+                        "sow.",
+                        "sow",
+                        "sou",
+                        "bride",
+                        "groom",
+                        "boy",
+                        "girl",
+                        "naam",
+                        "peru",
+                        "name",
+                        "పేరు",
+                        "అబ్బాయి పేరు",
+                        "అమ్మాయి పేరు",
+                        "వరుని పేరు",
+                        "వధువు పేరు",
+                        "చి.ల.సౌ.",
+                        "చి.ల.సౌ",
+                        "చి.");
 
-    public static final Set<String> TIME_OF_BIRTH = Set.of(
-            "time of birth",
-            "tob",
-            "time",
-            "birth time"
-    );
+        public static final Set<String> DATE_OF_BIRTH = Set.of(
+                        "date of birth",
+                        "date of brith",
+                        "birth date",
+                        "putinadinam",
+                        "puttina dinam",
+                        "puttina roju",
+                        "putinaroju",
+                        "janma dinam",
+                        "janmadinam",
+                        "born on",
+                        "born date",
+                        "born",
+                        "d.o.b",
+                        "dob",
+                        "పుట్టిన తేదీ",
+                        "పుట్టిన తేది",
+                        "పుట్టినరోజు",
+                        "జన్మదినం",
+                        "తేదీ",
+                        "తేది");
 
-    public static final Set<String> PLACE_OF_BIRTH = Set.of(
-            "place of birth",
-            "birth place"
-    );
+        public static final Set<String> TIME_OF_BIRTH = Set.of(
+                        "time of birth",
+                        "birth time",
+                        "janma samayam",
+                        "janmasamayam",
+                        "janma kaalam",
+                        "birth timing",
+                        "t.o.b",
+                        "tob",
+                        "time",
+                        "పుట్టిన సమయం",
+                        "జన్మ సమయం",
+                        "సమయం");
 
-    public static final Set<String> OCCUPATION = Set.of(
-            "occupation",
-            "profession",
-            "job",
-            "working as"
-    );
+        public static final Set<String> PLACE_OF_BIRTH = Set.of(
+                        "place of birth",
+                        "birth place",
+                        "birthplace",
+                        "janma sthalam",
+                        "janmasthalam",
+                        "born in",
+                        "born at",
+                        "p.o.b",
+                        "pob",
+                        "place",
+                        "పుట్టిన స్థలం",
+                        "జన్మ స్థలం",
+                        "స్థలం");
 
-    public static final Set<String> QUALIFICATION = Set.of(
-            "qualification",
-            "education",
-            "highest education"
-    );
+        public static final Set<String> HEIGHT = Set.of(
+                        "height (ft)",
+                        "height",
+                        "ettina",
+                        "ethu",
+                        "ht.",
+                        "ht",
+                        "ఎత్తు");
 
-    public static final Set<String> HEIGHT = Set.of(
-            "height"
-    );
+        public static final Set<String> CASTE = Set.of(
+                        "sub caste",
+                        "sub-caste",
+                        "subcaste",
+                        "caste / subcaste",
+                        "caste",
+                        "community",
+                        "kulam",
+                        "kulamu",
+                        "jaathi",
+                        "jati",
+                        "కులం",
+                        "శాఖ",
+                        "ఉపకులం",
+                        "జాతి");
 
-    public static final Set<String> CURRENT_LOCATION = Set.of(
-            "current location",
-            "native place",
-            "living in",
-            "settled in",
-            "staying in",
-            "location",
-            "present location"
-    );
+        public static final Set<String> GOTHRAM = Set.of(
+                        "gothram",
+                        "gothramu",
+                        "gotram",
+                        "gothra",
+                        "gotra",
+                        "గోత్రం",
+                        "గోత్రము");
 
-    public static final Set<String> FATHER_NAME = Set.of(
-            "father name",
-            "father's name"
-    );
+        public static final Set<String> RASHI = Set.of(
+                        "moon sign",
+                        "zodiac sign",
+                        "rashi",
+                        "raasi",
+                        "rasi",
+                        "రాశి");
 
-    public static final Set<String> MOTHER_NAME = Set.of(
-            "mother name",
-            "mother's name"
-    );
+        public static final Set<String> NAKSHATRAM = Set.of(
+                        "janma nakshatram",
+                        "birth star",
+                        "nakshatram",
+                        "nakshatramu",
+                        "nakshatra",
+                        "star",
+                        "నక్షత్రం",
+                        "నక్షత్రము",
+                        "జన్మ నక్షత్రం",
+                        "పాదం");
 
+        public static final Set<String> QUALIFICATION = Set.of(
+                        "highest qualification",
+                        "highest education",
+                        "educational qualification",
+                        "education qualification",
+                        "educational details",
+                        "qualification",
+                        "education",
+                        "degree",
+                        "chadavu",
+                        "studies",
+                        "study",
+                        "academics",
+                        "college / institute",
+                        "college/institute",
+                        "college or institute",
+                        "college name",
+                        "institute name",
+                        "university name",
+                        "college",
+                        "institute",
+                        "university",
+                        "campus",
+                        "studied at",
+                        "కళాశాల",
+                        "విశ్వవిద్యాలయం",
+                        "చదువు",
+                        "విద్య",
+                        "విద్యార్హత",
+                        "విద్యార్హతలు");
 
-    public static final Set<String> CASTE = Set.of(
-            "caste",
-            "community",
-            "kulam"
-    );
+        public static final Set<String> OCCUPATION = Set.of(
+                        "present occupation",
+                        "designation",
+                        "profession",
+                        "working as",
+                        "employed as",
+                        "occupation",
+                        "udhyogam",
+                        "udyogam",
+                        "job title",
+                        "job role",
+                        "role",
+                        "pani",
+                        "emp",
+                        "job",
+                        "ఉద్యోగం",
+                        "వృత్తి",
+                        "చేసే పని");
 
-    public static final Set<String> GOTHRAM = Set.of(
-            "gothram",
-            "gotra"
+        public static final Set<String> COMPANY = Set.of(
+                        "working company",
+                        "organization",
+                        "company name",
+                        "working at",
+                        "works at",
+                        "employer",
+                        "workplace",
+                        "company",
+                        "firm",
+                        "org",
+                        "కంపెనీ",
+                        "సంస్థ");
 
-    );
+        public static final Set<String> SALARY = Set.of(
+                        "annual package",
+                        "annual income",
+                        "annual salary",
+                        "monthly income",
+                        "monthly salary",
+                        "package",
+                        "income",
+                        "salary",
+                        "aadhayam",
+                        "ctc",
+                        "జీతం",
+                        "ఆదాయం",
+                        "వేతనం",
+                        "వార్షిక వేతనం",
+                        "వార్షిక వేతనము",
+                        "సంవత్సర వేతనం",
+                        "సంవత్సర ఆదాయం",
+                        "నెలసరి ఆదాయం",
+                        "సంపాదన");
 
-    public static final Set<String> RASHI = Set.of(
-            "rashi"
-    );
+        public static final Set<String> CURRENT_LOCATION = Set.of(
+                        "current location",
+                        "present location",
+                        "settled location",
+                        "currently living in",
+                        "currently staying in",
+                        "presently living in",
+                        "living in",
+                        "settled in",
+                        "staying in",
+                        "current city",
+                        "city",
+                        "residence",
+                        "present address",
+                        "working location",
+                        "work location",
+                        "location",
+                        "ప్రస్తుత నివాస స్థలం",
+                        "ప్రస్తుత నివాసస్థలం",
+                        "నివాస స్థలం",
+                        "నివాసస్థలం",
+                        "ప్రస్తుత నివాసం",
+                        "నివాసం",
+                        "ఉంటున్న ప్రాంతం",
+                        "ప్రాంతం");
 
-    public static final Set<String> NAKSHATRAM = Set.of(
-            "nakshatram",
-            "star"
-    );
+        public static final Set<String> NATIVE_PLACE = Set.of(
+                        "permanent address",
+                        "native place",
+                        "native district",
+                        "native town",
+                        "native village",
+                        "swasthalam",
+                        "native",
+                        "hometown",
+                        "home town",
+                        "ooru",
+                        "urru",
+                        "తల్లిదండ్రుల స్వస్థలం",
+                        "స్వస్థలం",
+                        "సొంతూరు",
+                        "సొంత ఊరు",
+                        "ఊరు",
+                        "గ్రామం");
 
-    public static final Set<String> SALARY = Set.of(
-            "salary",
-            "income",
-            "annual income",
-            "ctc"
-    );
+        public static final Set<String> FATHER_OCCUPATION = Set.of(
+                        "father's occupation",
+                        "father's profession",
+                        "father's business",
+                        "father occupation",
+                        "father profession",
+                        "father business",
+                        "father's job",
+                        "father job",
+                        "father work",
+                        "father is an",
+                        "father is a",
+                        "father is",
+                        "తండ్రి ఉద్యోగం",
+                        "తండ్రి వృత్తి",
+                        "తండ్రి గారి ఉద్యోగం",
+                        "నాన్నగారి ఉద్యోగం");
 
-    public static final Set<String> COMPANY = Set.of(
-            "company",
-            "organization",
-            "employer"
-    );
+        public static final Set<String> FATHER_NAME = Set.of(
+                        "father's name",
+                        "father name",
+                        "thandrigaari peru",
+                        "thandri peru",
+                        "father",
+                        "d/o.",
+                        "s/o.",
+                        "d/o",
+                        "s/o",
+                        "తండ్రి పేరు",
+                        "తండ్రి గారి పేరు",
+                        "తండ్రి",
+                        "నాన్న",
+                        "నాన్నగారి పేరు",
+                        "నాన్నగారు");
+
+        public static final Set<String> MOTHER_OCCUPATION = Set.of(
+                        "mother's occupation",
+                        "mother's profession",
+                        "mother occupation",
+                        "mother profession",
+                        "mother's job",
+                        "mother job",
+                        "mother work",
+                        "mother is an",
+                        "mother is a",
+                        "mother is",
+                        "తల్లి ఉద్యోగం",
+                        "తల్లి వృత్తి",
+                        "తల్లి గారి ఉద్యోగం",
+                        "అమ్మగారి ఉద్యోగం");
+
+        public static final Set<String> MOTHER_NAME = Set.of(
+                        "mother's name",
+                        "mother name",
+                        "thalligaari peru",
+                        "thalli peru",
+                        "mother",
+                        "తల్లి పేరు",
+                        "తల్లి గారి పేరు",
+                        "తల్లి",
+                        "అమ్మ",
+                        "అమ్మగారి పేరు",
+                        "అమ్మగారు");
+
+        public static final Set<String> SIBLINGS = Set.of(
+                        "siblings details",
+                        "sibling details",
+                        "siblings",
+                        "sibling",
+                        "brothers",
+                        "sisters",
+                        "brother",
+                        "sister",
+                        "anna",
+                        "thammudu",
+                        "akka",
+                        "chellelu",
+                        "తోబుట్టువులు",
+                        "సోదరులు",
+                        "అన్నదమ్ములు",
+                        "అక్కచెల్లెళ్ళు",
+                        "అన్న",
+                        "తమ్ముడు",
+                        "అక్క",
+                        "చెల్లెలు");
 }
