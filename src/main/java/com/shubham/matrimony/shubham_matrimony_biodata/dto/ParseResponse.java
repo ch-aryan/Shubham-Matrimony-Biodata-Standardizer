@@ -13,13 +13,16 @@ import java.util.Map;
 /**
  * Unified response contract for the biodata parsing API.
  *
- * <p>Contains:
+ * <p>
+ * Contains:
  * <ul>
- *   <li>{@link #status} — overall outcome classification.</li>
- *   <li>{@link #profile} — the extracted biodata (null when {@code REJECTED_INPUT}).</li>
- *   <li>{@link #confidenceScores} — HIGH or MISSING per canonical field.</li>
- *   <li>{@link #warnings} — categorized warnings for the frontend/operator.</li>
- *   <li>{@link #unparsedLines} — all lines the parser could not map (untruncated).</li>
+ * <li>{@link #status} — overall outcome classification.</li>
+ * <li>{@link #profile} — the extracted biodata (null when
+ * {@code REJECTED_INPUT}).</li>
+ * <li>{@link #confidenceScores} — HIGH or MISSING per canonical field.</li>
+ * <li>{@link #warnings} — categorized warnings for the frontend/operator.</li>
+ * <li>{@link #unparsedLines} — all lines the parser could not map
+ * (untruncated).</li>
  * </ul>
  */
 @Data

@@ -9,6 +9,7 @@ import com.shubham.matrimony.shubham_matrimony_biodata.dto.ProfileBiodata;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.ConfidenceScorer;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.EducationExtractor;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.FamilyExtractor;
+import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.HoroscopeExtractor;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.InputNormalizer;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.InputQualityValidator;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.OccupationExtractor;
@@ -29,28 +30,35 @@ import java.util.Map;
  * Orchestrates the biodata parsing pipeline by delegating each responsibility
  * to a focused single-purpose extractor.
  *
- * <p>Each stage is an independent, testable class — see the
+ * <p>
+ * Each stage is an independent, testable class — see the
  * {@code service/extractor/} package for details.
  *
  * <h3>Pipeline per line</h3>
  * <ol>
- *   <li>{@link InputNormalizer}      — splits raw text, flattens pipe-separated rows.</li>
- *   <li>{@link ScopeTracker} early   — resets array state, counts braces, detects family block.</li>
- *   <li>Ignorable / conversational   — {@link BiodataParserUtils#isIgnorableLine},
- *       {@link BiodataParserUtils#isConversationalNote}.</li>
- *   <li>{@link EducationExtractor}   — multi-line JSON array item continuation.</li>
- *   <li>{@link ScopeTracker} late    — family sub-section transitions, sibling close flush.</li>
- *   <li>{@link PersonalExtractor}    — standalone height / born (early).</li>
- *   <li>{@link EducationExtractor}   — standalone degree-prefix.</li>
- *   <li>{@link OccupationExtractor}  — standalone "role @ company".</li>
- *   <li>{@link FamilyExtractor}      — compound "Father X – job" lines.</li>
- *   <li>{@link PersonalExtractor}    — unlabeled candidate name (after other heuristics).</li>
- *   <li>{@link FamilyExtractor}      — standalone father-job / homemaker.</li>
- *   <li>{@link EducationExtractor}   — array-open bracket detection.</li>
- *   <li>Label scan                   — {@link BiodataParserUtils#parseTextSegments}.</li>
- *   <li>Segment dispatch             — OCCUPATION → {@link OccupationExtractor};
- *       family fields → {@link FamilyExtractor};
- *       rest → {@link PropertyExtractor}.</li>
+ * <li>{@link InputNormalizer} — splits raw text, flattens pipe-separated
+ * rows.</li>
+ * <li>{@link ScopeTracker} early — resets array state, counts braces, detects
+ * family block.</li>
+ * <li>Ignorable / conversational — {@link BiodataParserUtils#isIgnorableLine},
+ * {@link BiodataParserUtils#isConversationalNote}.</li>
+ * <li>{@link EducationExtractor} — multi-line JSON array item
+ * continuation.</li>
+ * <li>{@link ScopeTracker} late — family sub-section transitions, sibling close
+ * flush.</li>
+ * <li>{@link PersonalExtractor} — standalone height / born (early).</li>
+ * <li>{@link EducationExtractor} — standalone degree-prefix.</li>
+ * <li>{@link OccupationExtractor} — standalone "role @ company".</li>
+ * <li>{@link FamilyExtractor} — compound "Father X – job" lines.</li>
+ * <li>{@link PersonalExtractor} — unlabeled candidate name (after other
+ * heuristics).</li>
+ * <li>{@link FamilyExtractor} — standalone father-job / homemaker.</li>
+ * <li>{@link EducationExtractor} — array-open bracket detection.</li>
+ * <li>Label scan — {@link BiodataParserUtils#parseTextSegments}.</li>
+ * <li>Segment dispatch — OCCUPATION → {@link OccupationExtractor};
+ * horoscope fields → {@link HoroscopeExtractor};
+ * family fields → {@link FamilyExtractor};
+ * rest → {@link PropertyExtractor}.</li>
  * </ol>
  *
  * <h3>Post-processing</h3>
@@ -61,15 +69,16 @@ import java.util.Map;
 public class BiodataParserImplementation implements BiodataServiceParser {
 
     // ── Extractors wired as plain Java objects (no Spring context needed) ─────
-    private final FamilyExtractor      familyExtractor      = new FamilyExtractor();
-    private final InputNormalizer      normalizer           = new InputNormalizer();
-    private final ScopeTracker         scopeTracker         = new ScopeTracker(familyExtractor);
-    private final PersonalExtractor    personalExtractor    = new PersonalExtractor();
-    private final EducationExtractor   educationExtractor   = new EducationExtractor();
-    private final OccupationExtractor  occupationExtractor  = new OccupationExtractor();
-    private final PropertyExtractor    propertyExtractor    = new PropertyExtractor();
-    private final ConfidenceScorer     scorer               = new ConfidenceScorer(familyExtractor);
-    private final InputQualityValidator validator            = new InputQualityValidator();
+    private final FamilyExtractor familyExtractor = new FamilyExtractor();
+    private final HoroscopeExtractor horoscopeExtractor = new HoroscopeExtractor();
+    private final InputNormalizer normalizer = new InputNormalizer();
+    private final ScopeTracker scopeTracker = new ScopeTracker(familyExtractor);
+    private final PersonalExtractor personalExtractor = new PersonalExtractor();
+    private final EducationExtractor educationExtractor = new EducationExtractor();
+    private final OccupationExtractor occupationExtractor = new OccupationExtractor();
+    private final PropertyExtractor propertyExtractor = new PropertyExtractor();
+    private final ConfidenceScorer scorer = new ConfidenceScorer(familyExtractor);
+    private final InputQualityValidator validator = new InputQualityValidator();
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -84,7 +93,8 @@ public class BiodataParserImplementation implements BiodataServiceParser {
     /**
      * Full parse entry point.
      *
-     * @param rawText raw unformatted biodata text (WhatsApp, Telugu, JSON-like, etc.)
+     * @param rawText raw unformatted biodata text (WhatsApp, Telugu, JSON-like,
+     *                etc.)
      * @return {@link ExtractionResultDTO} with profile, confidence scores, unparsed
      *         lines, and warnings
      */
@@ -109,27 +119,37 @@ public class BiodataParserImplementation implements BiodataServiceParser {
             scopeTracker.updateEarly(rawLine, lowerLine, ctx);
 
             // ── Stage 2: skip non-data lines ──────────────────────────────────
-            if (BiodataParserUtils.isIgnorableLine(sanitized)) continue;
+            if (BiodataParserUtils.isIgnorableLine(sanitized))
+                continue;
             if (BiodataParserUtils.isConversationalNote(lowerLine)) {
                 ctx.unparsedLines.add(sanitized);
                 continue;
             }
 
             // ── Stage 3: multi-line JSON array item continuation ──────────────
-            if (educationExtractor.tryExtractArrayItem(sanitized, ctx)) continue;
+            if (educationExtractor.tryExtractArrayItem(sanitized, ctx))
+                continue;
 
             // ── Stage 4: late scope (family sub-section + sibling close flush) ─
             scopeTracker.updateLate(sanitized, lowerLine, ctx);
 
             // ── Stage 5: standalone heuristics (order matches original engine) ─
-            if (personalExtractor.tryExtractEarlyHeuristics(sanitized, lowerLine, ctx)) continue;
-            if (educationExtractor.tryExtractStandalone(sanitized, ctx))               continue;
-            if (occupationExtractor.tryExtractStandalone(sanitized, lowerLine, ctx))   continue;
-            if (familyExtractor.tryExtractCompoundParentLine(sanitized, lowerLine, ctx)) continue;
-            if (personalExtractor.tryExtractUnlabeledName(sanitized, lowerLine, ctx))  continue;
-            if (familyExtractor.tryExtractStandaloneFatherJob(sanitized, ctx))         continue;
-            if (familyExtractor.tryExtractStandaloneMotherOccupation(sanitized, ctx))  continue;
-            if (educationExtractor.tryDetectArrayOpen(sanitized, ctx))                  continue;
+            if (personalExtractor.tryExtractEarlyHeuristics(sanitized, lowerLine, ctx))
+                continue;
+            if (educationExtractor.tryExtractStandalone(sanitized, ctx))
+                continue;
+            if (occupationExtractor.tryExtractStandalone(sanitized, lowerLine, ctx))
+                continue;
+            if (familyExtractor.tryExtractCompoundParentLine(sanitized, lowerLine, ctx))
+                continue;
+            if (personalExtractor.tryExtractUnlabeledName(sanitized, lowerLine, ctx))
+                continue;
+            if (familyExtractor.tryExtractStandaloneFatherJob(sanitized, ctx))
+                continue;
+            if (familyExtractor.tryExtractStandaloneMotherOccupation(sanitized, ctx))
+                continue;
+            if (educationExtractor.tryDetectArrayOpen(sanitized, ctx))
+                continue;
 
             // ── Stage 6: label-based segment extraction ───────────────────────
             List<ParsedSegment> segments = BiodataParserUtils.parseTextSegments(sanitized);
@@ -151,9 +171,14 @@ public class BiodataParserImplementation implements BiodataServiceParser {
                     continue;
                 }
 
+                // Horoscope fields: RASHI, NAKSHATRAM, GOTHRAM
+                if (horoscopeExtractor.tryApply(field, value, ctx)) {
+                    continue;
+                }
+
                 // Family fields: FATHER_NAME, MOTHER_NAME, SIBLINGS, NATIVE_PLACE, etc.
-                // Also silently drops any other field encountered inside a family block.
-                if (familyExtractor.tryApply(field, value, ctx)) continue;
+                if (familyExtractor.tryApply(field, value, ctx))
+                    continue;
 
                 // Candidate-level: SURNAME, FULL_NAME, SIBLINGS, and generic apply
                 propertyExtractor.apply(field, value, ctx);
@@ -170,7 +195,8 @@ public class BiodataParserImplementation implements BiodataServiceParser {
     /**
      * Full parse with post-parse validation and warning generation.
      *
-     * <p>Delegates to {@link #parseBiodata(String)} (engine is untouched), then
+     * <p>
+     * Delegates to {@link #parseBiodata(String)} (engine is untouched), then
      * passes the result to {@link InputQualityValidator} for classification.
      *
      * @param rawText raw unformatted biodata text
@@ -200,7 +226,7 @@ public class BiodataParserImplementation implements BiodataServiceParser {
     }
 
     private ExtractionResultDTO buildResult(ParseContext ctx,
-                                            Map<String, FieldConfidence> confidenceScores) {
+            Map<String, FieldConfidence> confidenceScores) {
         return ExtractionResultDTO.builder()
                 .profile(ctx.profile)
                 .confidenceScores(confidenceScores)

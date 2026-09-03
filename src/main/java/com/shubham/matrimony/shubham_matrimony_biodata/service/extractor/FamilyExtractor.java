@@ -149,11 +149,12 @@ public class FamilyExtractor {
         if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FATHER_NAME) {
             String fName = value;
             String fJob = null;
-            if (value.contains(" (") && value.endsWith(")")) {
-                int pIdx = value.lastIndexOf(" (");
-                if (pIdx >= 0 && pIdx + 2 <= value.length() - 1) {
-                    fName = value.substring(0, pIdx).trim();
-                    fJob = value.substring(pIdx + 2, value.length() - 1).trim();
+            if (value.contains("(") && value.endsWith(")")) {
+                int openParen = value.lastIndexOf('(');
+                int closeParen = value.lastIndexOf(')');
+                if (openParen >= 0 && openParen < closeParen) {
+                    fName = value.substring(0, openParen).trim();
+                    fJob = value.substring(openParen + 1, closeParen).trim();
                 }
             } else if (value.contains(" - ")) {
                 String[] parts = value.split("\\s+-\\s+", 2);
@@ -185,11 +186,12 @@ public class FamilyExtractor {
         if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.MOTHER_NAME) {
             String mName = value;
             String mJob = null;
-            if (value.contains(" (") && value.endsWith(")")) {
-                int pIdx = value.lastIndexOf(" (");
-                if (pIdx >= 0 && pIdx + 2 <= value.length() - 1) {
-                    mName = value.substring(0, pIdx).trim();
-                    mJob = value.substring(pIdx + 2, value.length() - 1).trim();
+            if (value.contains("(") && value.endsWith(")")) {
+                int openParen = value.lastIndexOf('(');
+                int closeParen = value.lastIndexOf(')');
+                if (openParen >= 0 && openParen < closeParen) {
+                    mName = value.substring(0, openParen).trim();
+                    mJob = value.substring(openParen + 1, closeParen).trim();
                 }
             } else if (value.contains(" - ")) {
                 String[] parts = value.split("\\s+-\\s+", 2);
@@ -217,19 +219,41 @@ public class FamilyExtractor {
             return true;
         }
 
-        // ── Location fields — always candidate-level, even inside family block ──
-        if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.NATIVE_PLACE) {
-            if (ctx.profile.getNativePlace() == null || ctx.profile.getNativePlace().isBlank()) {
-                ctx.profile.setNativePlace(value);
-            }
-            return true;
-        }
+        // ── Explicit candidate-level fields — NEVER swallowed by family block ──
+        if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.DATE_OF_BIRTH
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.TIME_OF_BIRTH
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.PLACE_OF_BIRTH
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.HEIGHT
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.CASTE
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.GOTHRAM
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.RASHI
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.NAKSHATRAM
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.QUALIFICATION
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.SALARY
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.COMPANY
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.NATIVE_PLACE
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.CURRENT_LOCATION) {
 
-        if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.CURRENT_LOCATION) {
-            if (ctx.profile.getCurrentLocation() == null || ctx.profile.getCurrentLocation().isBlank()) {
-                ctx.profile.setCurrentLocation(value);
+            // Outside JSON braces, encountering candidate core fields means family section has ended
+            if (ctx.braceDepth <= 0) {
+                ctx.inFamilyBlock = false;
+                ctx.section = ParseContext.FamilySection.NONE;
             }
-            return true;
+
+            if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.NATIVE_PLACE) {
+                if (ctx.profile.getNativePlace() == null || ctx.profile.getNativePlace().isBlank()) {
+                    ctx.profile.setNativePlace(value);
+                }
+                return true;
+            }
+            if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.CURRENT_LOCATION) {
+                if (ctx.profile.getCurrentLocation() == null || ctx.profile.getCurrentLocation().isBlank()) {
+                    ctx.profile.setCurrentLocation(value);
+                }
+                return true;
+            }
+            // Candidate core attributes — let candidate extractors handle them
+            return false;
         }
 
         // ── Inside a family block: route generic fields to the right member ──
@@ -256,8 +280,7 @@ public class FamilyExtractor {
                     return true;
                 }
             }
-            // Drop any other field inside a family block to prevent it from
-            // overwriting candidate-level properties.
+            // Drop any other generic field inside a family block
             return true;
         }
 

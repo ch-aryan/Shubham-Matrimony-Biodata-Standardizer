@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.49" tests="31" errors="0" skipped="0" failures="0" flakes="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.shubham.matrimony.shubham_matrimony_biodata.service.RealBiodataSamplesTest" time="0.024" tests="3" errors="0" skipped="0" failures="0" flakes="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -56,57 +56,7 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="61.0"/>
   </properties>
-  <testcase name="shouldParseJsonRawTextProfile1" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.148"/>
-  <testcase name="shouldParseJsonRawTextProfile2" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.025"/>
-  <testcase name="shouldParseJsonRawTextProfile3" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.007"/>
-  <testcase name="shouldParseMultipleFields" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.01"/>
-  <testcase name="shouldParseBasicBiodata" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.005"/>
-  <testcase name="shouldParseCategory8OcrScreenshotText" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.006"/>
-  <testcase name="shouldHandleDirtyFormattingWithBulletsAndDelimiters" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.008"/>
-  <testcase name="shouldParseTeluguTransliteratedFields" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.003"/>
-  <testcase name="shouldParseWhatsAppStyleBiodata" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.01"/>
-  <testcase name="shouldMarkBlankExtractedValuesAsMissing" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.002"/>
-  <testcase name="shouldParseUserPostmanInput" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.007"/>
-  <testcase name="shouldParseNativeTeluguScriptProfileAndHandleCompoundFatherOccupation" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.013"/>
-  <testcase name="shouldHandleNullOrEmptyInputSafely" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.004"/>
-  <testcase name="shouldParseCategory4PureTeluguLabelled" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.007"/>
-  <testcase name="shouldParseCategory5MixedTeluguEnglish" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.007"/>
-  <testcase name="shouldCaptureUnparsedLinesAndIgnoreDecorations" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.008"/>
-  <testcase name="shouldHandleTeluguAndEnglishMixedSingleLine" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.002"/>
-  <testcase name="shouldHandleMixedCaseAndMessySpacing" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.002"/>
-  <testcase name="shouldParseInlineWithoutExplicitDelimiters" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.001"/>
-  <testcase name="shouldParseAliasLabels" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.001"/>
-  <testcase name="shouldHandleMissingFields" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.001"/>
-  <testcase name="shouldParseCategory7PdfExtractedText" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.008"/>
-  <testcase name="shouldParseSingleLineWithCommaDelimiters" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.003"/>
-  <testcase name="shouldParseCategory2MessyLabelledEnglish" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.007"/>
-  <testcase name="shouldParseCategory1NormalLabelledEnglish" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.008"/>
-  <testcase name="shouldParseTeluguJsonWithGrandparentsAndReferences" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.034">
-    <system-out><![CDATA[FULL NAME: Rohan Thota
-DOB: 24-06-1997
-TOB: సాయంత్రం 7:00 గంటలకు
-POB: Nizamabad
-HEIGHT: 6 అడుగులు
-CASTE: మున్నూరు కాపు
-GOTHRAM: కాశ్యప
-RASHI: మకర
-QUALIFICATION: BBA, PGD in Financial Planning
-NAKSHATRAM: ధనిష్ఠ
-OCCUPATION: Assistant Manager
-COMPANY: CIBC Mellon
-SALARY: CAD 100K
-CURRENT LOCATION: Toronto, Canada
-FATHER NAME: Ravinder Thota
-FATHER OCCUPATION: COO - Chief Operating Officer
-MOTHER NAME: Vanitha
-MOTHER OCCUPATION: గృహిణి
-SIBLINGS: Sibling, Elder Brother: Rohil Thota (Software Engineer)
-UNPARSED LINES: ["ప్రొఫైల్_రకం": "వరుడు",, "మూలం": "బయోడేటా_3_మరియు_4",, "ఛాయ": "గోధుమ రంగు",, "వైవాహిక_స్థితి": "ఇంతవరకు వివాహం కాలేదు",, "నివాస_స్థితి": "Permanent Resident (PR)",, "కుటుంబం": {, "తండ్రి": {, "ప్రదేశం": "Hyderabad",, "తల్లి": {, "తల్లిదండ్రుల_ఇంటి_పేరు": "Akula",, "తల్లిదండ్రుల_నివాస_స్థలం": "Suchitra, Hyderabad",, "ఆస్తులు_మరియు_ఆర్థిక_స్థితి": "సుఖసంతోషాలతో స్థిరపడిన కుటుంబం",, "తాత_ముత్తాతల_వివరాలు": {, "తండ్రి_తరపు": {, "తాత": {, "స్థితి": "స్వర్గీయులు",, "అమ్మమ్మ": {, "ప్రదేశం": "Yamcha, Nizamabad", "తల్లి_తరపు": {, "తాత": {, "అమ్మమ్మ": {, "సంబంధం": "అన్నయ్య",, "ప్రదేశం": "USA",, "వైవాహిక_స్థితి": "వివాహితుడు",, "భార్య": {, "జీవిత_భాగస్వామి_ఎంపికలు": {, "వయస్సు": "2 నుండి 3 సంవత్సరాలు చిన్నవారు",, "ప్రదేశం": "ఏదైనా",, "ఆస్తి_మరియు_ఆదాయ_అంచనాలు": "సుఖసంతోషాలతో స్థిరపడిన కుటుంబం", "సమాజం": "మున్నూరు కాపు సంఘం",, "హోదా": "మాజీ MLC",, "ప్రదేశం": "Hyderabad", "సమాజం": "మున్నూరు కాపు సంఘం",, "హోదా": "వ్యాపారవేత్త",, "ప్రదేశం": "Hyderabad", "గమనిక": "ఈ బయోడేటాలోని సమాచారం తల్లిదండ్రులు లేదా సంరక్షకులు అందించినది."]
-]]></system-out>
-  </testcase>
-  <testcase name="shouldParseSingleLineWithPipeDelimiters" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.004"/>
-  <testcase name="shouldParsePipeDelimitedBiodata" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.006"/>
-  <testcase name="shouldParseProfile3And4WithMotherDetails" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.017"/>
-  <testcase name="shouldParseCategory3SingleLineLabelled" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.008"/>
-  <testcase name="shouldDisambiguateFatherAndMotherFromCandidateDetails" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.BiodataParserImplementationTest" time="0.005"/>
+  <testcase name="testSample3_KashaTejaswini" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.RealBiodataSamplesTest" time="0.011"/>
+  <testcase name="testSample1_BhavaniManne" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.RealBiodataSamplesTest" time="0.004"/>
+  <testcase name="testSample2_RamshettyVignesh" classname="com.shubham.matrimony.shubham_matrimony_biodata.service.RealBiodataSamplesTest" time="0.004"/>
 </testsuite>

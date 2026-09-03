@@ -11,7 +11,8 @@ import java.util.List;
 /**
  * A single warning produced during parse result analysis.
  *
- * <p>Each warning has a {@link WarningCategory}, a human-readable message,
+ * <p>
+ * Each warning has a {@link WarningCategory}, a human-readable message,
  * and an optional list of details (e.g. the specific unrecognized lines).
  */
 @Data
