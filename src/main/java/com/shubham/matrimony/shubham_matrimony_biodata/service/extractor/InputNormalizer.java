@@ -4,16 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Converts raw biodata text into an ordered flat list of raw (unsanitized) lines.
+ * Converts raw biodata text into an ordered flat list of raw (unsanitized)
+ * lines.
  *
- * <p>Responsibilities:
+ * <p>
+ * Responsibilities:
  * <ul>
- *   <li>Split on newlines ({@code \r?\n}).</li>
- *   <li>Flatten pipe-separated segments on a single line
- *       (e.g. {@code "Name: X | DOB: Y | Job: Z"} → 3 separate entries).</li>
+ * <li>Split on newlines ({@code \r?\n}).</li>
+ * <li>Flatten pipe-separated segments on a single line
+ * (e.g. {@code "Name: X | DOB: Y | Job: Z"} → 3 separate entries).</li>
  * </ul>
  *
- * <p>This is the first stage of the parsing pipeline. It does NOT sanitize or
+ * <p>
+ * This is the first stage of the parsing pipeline. It does NOT sanitize or
  * interpret the lines — that is left to later stages.
  */
 public class InputNormalizer {

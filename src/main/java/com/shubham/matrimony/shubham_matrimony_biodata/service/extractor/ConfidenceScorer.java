@@ -8,16 +8,22 @@ import java.util.Map;
 /**
  * Post-processing phase executed after the main parse loop completes.
  *
- * <p>Responsibilities (in order):
+ * <p>
+ * Responsibilities (in order):
  * <ol>
- *   <li>Flush the last buffered sibling record (the loop exit may leave one pending).</li>
- *   <li>Join all sibling entries into {@code siblingsDetails} if not already set.</li>
- *   <li>Merge {@code surname} and {@code givenName} buffers into {@code fullName}.</li>
- *   <li>Compute a {@link FieldConfidence} map: HIGH when a field value is present,
- *       MISSING otherwise.</li>
+ * <li>Flush the last buffered sibling record (the loop exit may leave one
+ * pending).</li>
+ * <li>Join all sibling entries into {@code siblingsDetails} if not already
+ * set.</li>
+ * <li>Merge {@code surname} and {@code givenName} buffers into
+ * {@code fullName}.</li>
+ * <li>Compute a {@link FieldConfidence} map: HIGH when a field value is
+ * present,
+ * MISSING otherwise.</li>
  * </ol>
  *
- * <p>Also provides {@link #populateMissingConfidence} used as a fast-path when the
+ * <p>
+ * Also provides {@link #populateMissingConfidence} used as a fast-path when the
  * raw input is blank or null.
  */
 public class ConfidenceScorer {
@@ -34,7 +40,8 @@ public class ConfidenceScorer {
     /**
      * Finalizes the profile in {@code ctx} and populates {@code confidenceScores}.
      *
-     * @param ctx              shared parse context (mutated: fullName, siblingsDetails may be set)
+     * @param ctx              shared parse context (mutated: fullName,
+     *                         siblingsDetails may be set)
      * @param confidenceScores target map to fill with HIGH / MISSING per field
      */
     public void finalizeProfile(ParseContext ctx, Map<String, FieldConfidence> confidenceScores) {
@@ -50,10 +57,11 @@ public class ConfidenceScorer {
 
         // Merge surname + givenName into fullName
         // Examples:
-        //   surname="Thota"  givenName="Rohan"          → "Thota Rohan"
-        //   surname="Thota"  givenName="Rohan Thota"     → "Rohan Thota" (surname already inside)
-        //   givenName="Aryan Kumar"  (no surname)        → "Aryan Kumar"
-        //   surname="Kamma"  (no givenName)              → "Kamma"
+        // surname="Thota" givenName="Rohan" → "Thota Rohan"
+        // surname="Thota" givenName="Rohan Thota" → "Rohan Thota" (surname already
+        // inside)
+        // givenName="Aryan Kumar" (no surname) → "Aryan Kumar"
+        // surname="Kamma" (no givenName) → "Kamma"
         if (ctx.surname != null && !ctx.surname.isBlank()
                 && ctx.givenName != null && !ctx.givenName.isBlank()) {
             if (!ctx.givenName.toLowerCase().contains(ctx.surname.toLowerCase())) {

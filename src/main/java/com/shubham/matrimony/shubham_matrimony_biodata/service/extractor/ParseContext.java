@@ -7,17 +7,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Shared mutable state passed through all extractor classes during a single parse run.
+ * Shared mutable state passed through all extractor classes during a single
+ * parse run.
  *
- * <p>Previously these were 15+ local variables scattered across {@code parseBiodata()}.
- * Grouping them here lets each extractor read and update state without needing to
+ * <p>
+ * Previously these were 15+ local variables scattered across
+ * {@code parseBiodata()}.
+ * Grouping them here lets each extractor read and update state without needing
+ * to
  * return complex objects or use method parameters for every variable.
  */
 public class ParseContext {
 
     /**
      * Tracks which family member's sub-block is currently being parsed.
-     * Prevents a father's "Farmer" occupation from overwriting the candidate's "Software Engineer".
+     * Prevents a father's "Farmer" occupation from overwriting the candidate's
+     * "Software Engineer".
      */
     public enum FamilySection {
         NONE, FATHER, MOTHER, SIBLING, OTHER_FAMILY
@@ -37,10 +42,14 @@ public class ParseContext {
     /** Whether the parser is currently inside a family details block. */
     public boolean inFamilyBlock = false;
 
-    /** Which family member is currently in scope (Father / Mother / Sibling / …). */
+    /**
+     * Which family member is currently in scope (Father / Mother / Sibling / …).
+     */
     public FamilySection section = FamilySection.NONE;
 
-    /** JSON-style brace depth counter; prevents scope confusion in JSON-like inputs. */
+    /**
+     * JSON-style brace depth counter; prevents scope confusion in JSON-like inputs.
+     */
     public int braceDepth = 0;
 
     /**
@@ -57,17 +66,28 @@ public class ParseContext {
     public BiodataField inArrayField = null;
 
     // ── Name buffers ─────────────────────────────────────────────────────────
-    /** Surname / last-name captured separately; merged into fullName in post-processing. */
+    /**
+     * Surname / last-name captured separately; merged into fullName in
+     * post-processing.
+     */
     public String surname = null;
 
-    /** Given name captured from a "Name:" label; merged with surname in post-processing. */
+    /**
+     * Given name captured from a "Name:" label; merged with surname in
+     * post-processing.
+     */
     public String givenName = null;
 
     // ── Sibling accumulator ──────────────────────────────────────────────────
-    /** All completed sibling entries formatted as "Elder Brother: Rohil (Software Engineer)". */
+    /**
+     * All completed sibling entries formatted as "Elder Brother: Rohil (Software
+     * Engineer)".
+     */
     public final List<String> siblingEntries = new ArrayList<>();
 
-    /** Relation type of the sibling currently being parsed (e.g. "Elder Brother"). */
+    /**
+     * Relation type of the sibling currently being parsed (e.g. "Elder Brother").
+     */
     public String currentSiblingRelation = null;
 
     /** Name of the sibling currently being parsed. */

@@ -4,15 +4,19 @@ import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField;
 import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataParserUtils;
 
 /**
- * Extracts personal candidate fields that appear <em>without</em> an explicit label.
+ * Extracts personal candidate fields that appear <em>without</em> an explicit
+ * label.
  *
- * <p>Two phases are exposed because the original engine's order matters:
+ * <p>
+ * Two phases are exposed because the original engine's order matters:
  * <ul>
- *   <li>{@link #tryExtractEarlyHeuristics} — height and "born" suffix.
- *       Must run <em>before</em> education and occupation heuristics.</li>
- *   <li>{@link #tryExtractUnlabeledName} — unlabeled name at the top of the document.
- *       Must run <em>after</em> education and occupation heuristics (so "B.Tech JNTU" is
- *       not mistakenly captured as a name).</li>
+ * <li>{@link #tryExtractEarlyHeuristics} — height and "born" suffix.
+ * Must run <em>before</em> education and occupation heuristics.</li>
+ * <li>{@link #tryExtractUnlabeledName} — unlabeled name at the top of the
+ * document.
+ * Must run <em>after</em> education and occupation heuristics (so "B.Tech JNTU"
+ * is
+ * not mistakenly captured as a name).</li>
  * </ul>
  */
 public class PersonalExtractor {
@@ -22,10 +26,15 @@ public class PersonalExtractor {
     /**
      * Attempts to detect a standalone height or suffix-born place-of-birth.
      *
-     * <p><b>Height examples:</b> {@code 6ft}, {@code 5'9"}, {@code 5.8}, {@code 5ft 10in}
-     * <p><b>Born-suffix examples:</b> {@code Nizamabad born}, {@code at Hyderabad born}
+     * <p>
+     * <b>Height examples:</b> {@code 6ft}, {@code 5'9"}, {@code 5.8},
+     * {@code 5ft 10in}
+     * <p>
+     * <b>Born-suffix examples:</b> {@code Nizamabad born},
+     * {@code at Hyderabad born}
      *
-     * @return {@code true} if a field was consumed; the caller should {@code continue}.
+     * @return {@code true} if a field was consumed; the caller should
+     *         {@code continue}.
      */
     public boolean tryExtractEarlyHeuristics(String sanitized, String lowerLine, ParseContext ctx) {
         // Standalone height (e.g. "6ft", "5'9", "5.8", "5ft 10in")
@@ -34,7 +43,7 @@ public class PersonalExtractor {
                 && !sanitized.contains(",")
                 && sanitized.matches(
                         "(?i)^[4-7]\\s*('|\"|ft|feet|\\.)(\\s*\\d{1,2}(\"|in|inches)?)?$"
-                        + "|^[4-7]\\s*(ft|feet)$")) {
+                                + "|^[4-7]\\s*(ft|feet)$")) {
             ctx.profile.setHeight(sanitized);
             return true;
         }
@@ -60,16 +69,19 @@ public class PersonalExtractor {
     /**
      * Attempts to detect an unlabeled candidate name at the top of the document.
      *
-     * <p>Guards (all must pass):
+     * <p>
+     * Guards (all must pass):
      * <ul>
-     *   <li>Full name not yet set.</li>
-     *   <li>Not inside a family block and not inside braces.</li>
-     *   <li>Line has no {@code :} {@code -} {@code ,} {@code @} and no digits.</li>
-     *   <li>1–4 words; does not contain "details", "biodata", "profile", "born", "ft".</li>
-     *   <li>Line does not start with (or equal) any known field alias.</li>
+     * <li>Full name not yet set.</li>
+     * <li>Not inside a family block and not inside braces.</li>
+     * <li>Line has no {@code :} {@code -} {@code ,} {@code @} and no digits.</li>
+     * <li>1–4 words; does not contain "details", "biodata", "profile", "born",
+     * "ft".</li>
+     * <li>Line does not start with (or equal) any known field alias.</li>
      * </ul>
      *
-     * @return {@code true} if a candidate name was set; the caller should {@code continue}.
+     * @return {@code true} if a candidate name was set; the caller should
+     *         {@code continue}.
      */
     public boolean tryExtractUnlabeledName(String sanitized, String lowerLine, ParseContext ctx) {
         if (ctx.profile.getFullName() != null || ctx.inFamilyBlock || ctx.braceDepth != 0) {

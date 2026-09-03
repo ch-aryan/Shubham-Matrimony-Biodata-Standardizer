@@ -2,11 +2,15 @@ package com.shubham.matrimony.shubham_matrimony_biodata.service;
 
 import com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResultDTO;
 import com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence;
+import com.shubham.matrimony.shubham_matrimony_biodata.dto.ParseResponse;
+import com.shubham.matrimony.shubham_matrimony_biodata.dto.ParseStatus;
+import com.shubham.matrimony.shubham_matrimony_biodata.dto.ParseWarning;
 import com.shubham.matrimony.shubham_matrimony_biodata.dto.ProfileBiodata;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.ConfidenceScorer;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.EducationExtractor;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.FamilyExtractor;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.InputNormalizer;
+import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.InputQualityValidator;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.OccupationExtractor;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.ParseContext;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.PersonalExtractor;
@@ -65,6 +69,7 @@ public class BiodataParserImplementation implements BiodataServiceParser {
     private final OccupationExtractor  occupationExtractor  = new OccupationExtractor();
     private final PropertyExtractor    propertyExtractor    = new PropertyExtractor();
     private final ConfidenceScorer     scorer               = new ConfidenceScorer(familyExtractor);
+    private final InputQualityValidator validator            = new InputQualityValidator();
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -161,6 +166,38 @@ public class BiodataParserImplementation implements BiodataServiceParser {
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
+
+    /**
+     * Full parse with post-parse validation and warning generation.
+     *
+     * <p>Delegates to {@link #parseBiodata(String)} (engine is untouched), then
+     * passes the result to {@link InputQualityValidator} for classification.
+     *
+     * @param rawText raw unformatted biodata text
+     * @return {@link ParseResponse} with status, profile, confidence scores,
+     *         categorized warnings, and all unparsed lines (no truncation)
+     */
+    @Override
+    public ParseResponse parseAndValidate(String rawText) {
+        ExtractionResultDTO result = parseBiodata(rawText);
+
+        ParseStatus status = validator.classify(
+                result.getConfidenceScores(),
+                result.getUnparsedLines());
+
+        List<ParseWarning> warnings = validator.generateWarnings(
+                status,
+                result.getConfidenceScores(),
+                result.getUnparsedLines());
+
+        return ParseResponse.builder()
+                .status(status)
+                .profile(status == ParseStatus.REJECTED_INPUT ? null : result.getProfile())
+                .confidenceScores(result.getConfidenceScores())
+                .warnings(warnings)
+                .unparsedLines(result.getUnparsedLines())
+                .build();
+    }
 
     private ExtractionResultDTO buildResult(ParseContext ctx,
                                             Map<String, FieldConfidence> confidenceScores) {

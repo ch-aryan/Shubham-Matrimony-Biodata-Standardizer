@@ -4,19 +4,27 @@ import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField;
 
 /**
  * Applies candidate-level labeled field segments that are not handled by any
- * of the specialized extractors ({@link FamilyExtractor}, {@link OccupationExtractor}, etc.).
+ * of the specialized extractors ({@link FamilyExtractor},
+ * {@link OccupationExtractor}, etc.).
  *
- * <p>Handles:
+ * <p>
+ * Handles:
  * <ul>
- *   <li>{@code SURNAME} — buffered separately; merged with {@code givenName} in post-processing.</li>
- *   <li>{@code FULL_NAME} — buffered as {@code givenName}; longest-wins when seen multiple times.</li>
- *   <li>{@code SIBLINGS} — candidate-level sibling count/description at top level.</li>
- *   <li>All remaining fields — generic first-wins apply via
- *       {@link BiodataField#apply(com.shubham.matrimony.shubham_matrimony_biodata.dto.ProfileBiodata, String)}.</li>
+ * <li>{@code SURNAME} — buffered separately; merged with {@code givenName} in
+ * post-processing.</li>
+ * <li>{@code FULL_NAME} — buffered as {@code givenName}; longest-wins when seen
+ * multiple times.</li>
+ * <li>{@code SIBLINGS} — candidate-level sibling count/description at top
+ * level.</li>
+ * <li>All remaining fields — generic first-wins apply via
+ * {@link BiodataField#apply(com.shubham.matrimony.shubham_matrimony_biodata.dto.ProfileBiodata, String)}.</li>
  * </ul>
  *
- * <p>This extractor is the <em>last</em> step in the segment-dispatch chain and is only
- * called when {@link FamilyExtractor#tryApply} returned {@code false} (i.e. the segment
+ * <p>
+ * This extractor is the <em>last</em> step in the segment-dispatch chain and is
+ * only
+ * called when {@link FamilyExtractor#tryApply} returned {@code false} (i.e. the
+ * segment
  * belongs to the candidate, not a family member).
  */
 public class PropertyExtractor {
@@ -24,7 +32,9 @@ public class PropertyExtractor {
     /**
      * Applies a candidate-level segment to the profile stored in {@code ctx}.
      *
-     * <p>Assumes the caller has already verified the segment is <em>not</em> a family field
+     * <p>
+     * Assumes the caller has already verified the segment is <em>not</em> a family
+     * field
      * (i.e. {@link FamilyExtractor#tryApply} returned {@code false}).
      *
      * @param field the canonical field enum constant
