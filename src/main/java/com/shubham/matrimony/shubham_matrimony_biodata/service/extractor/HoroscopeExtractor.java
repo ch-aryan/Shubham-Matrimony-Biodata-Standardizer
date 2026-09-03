@@ -47,7 +47,7 @@ public class HoroscopeExtractor {
 
     private void applyRashi(String value, ParseContext ctx) {
         // Check if value contains both Rashi and Nakshatram (e.g. "Simha rasi, Makha nakshatram")
-        if (value.contains(",") || value.toLowerCase().contains("nakshatra") || value.toLowerCase().contains("star")) {
+        if (value.contains(",") || value.toLowerCase().contains("nakshatra") || value.toLowerCase().contains("star") || value.toLowerCase().contains("nakhsathram")) {
             String[] parts = value.split("[,&|]+");
             for (String part : parts) {
                 String trimmed = part.trim();
@@ -108,7 +108,7 @@ public class HoroscopeExtractor {
 
     private String cleanNakshatramSuffix(String val) {
         String trimmed = val.trim();
-        // Remove trailing "nakshatram", "nakshathram", "nakshatra", "star", etc.
+        // Remove trailing "nakshatram", "nakshathram", "nakhsathram", "nakshtram", "nakshatra", "star", etc.
         String cleaned = trimmed.replaceAll("(?i)\\s+(nakshatram|nakshathram|nakhsathram|nakshtram|nakshatra|star|నక్షత్రం)$", "").trim();
         // Remove leading "star:", "nakshatram:", etc. if present
         cleaned = cleaned.replaceAll("(?i)^(nakshatram|nakshathram|nakhsathram|nakshtram|nakshatra|star|నక్షత్రం)[:\\s-]+", "").trim();
