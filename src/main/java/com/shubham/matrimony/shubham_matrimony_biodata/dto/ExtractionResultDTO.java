@@ -26,4 +26,14 @@ public class ExtractionResultDTO {
 
     @Builder.Default
     private List<String> warnings = new ArrayList<>();
+
+    @Builder.Default
+    private List<ConflictRecord> conflicts = new ArrayList<>();
+
+    @Builder.Default
+    private List<ExtractionResult> evidenceTrail = new ArrayList<>();
+
+    public boolean hasConflicts() {
+        return conflicts != null && !conflicts.isEmpty();
+    }
 }

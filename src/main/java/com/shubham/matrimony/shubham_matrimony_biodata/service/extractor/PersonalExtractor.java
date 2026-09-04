@@ -45,6 +45,14 @@ public class PersonalExtractor {
                         "(?i)^[4-7]\\s*('|\"|ft|feet|\\.)(\\s*\\d{1,2}(\"|in|inches)?)?$"
                                 + "|^[4-7]\\s*(ft|feet)$")) {
             ctx.profile.setHeight(sanitized);
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(BiodataField.HEIGHT)
+                    .value(sanitized)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                    .sourceText(sanitized)
+                    .build());
             return true;
         }
 
@@ -57,6 +65,14 @@ public class PersonalExtractor {
             }
             if (ctx.profile.getPlaceOfBirth() == null || ctx.profile.getPlaceOfBirth().isBlank()) {
                 ctx.profile.setPlaceOfBirth(place);
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(BiodataField.PLACE_OF_BIRTH)
+                        .value(place)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                        .sourceText(sanitized)
+                        .build());
                 return true;
             }
         }
@@ -98,7 +114,11 @@ public class PersonalExtractor {
                 || lowerLine.contains("details") || lowerLine.contains("biodata")
                 || lowerLine.contains("profile") || lowerLine.contains("born")
                 || lowerLine.contains("ft") || lowerLine.contains("confidential")
-                || lowerLine.contains("page")) {
+                || lowerLine.contains("page")
+                || lowerLine.contains("అమ్మాయి") || lowerLine.contains("అబ్బాయి")
+                || lowerLine.contains("bride") || lowerLine.contains("groom")
+                || lowerLine.contains("match") || lowerLine.contains("మ్యాచ్")
+                || lowerLine.contains("సంబంధం")) {
             return false;
         }
 
@@ -113,6 +133,15 @@ public class PersonalExtractor {
 
         ctx.profile.setFullName(sanitized);
         ctx.givenName = sanitized;
+        ctx.givenNameIsHeuristic = true;
+        ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                .field(BiodataField.FULL_NAME)
+                .value(sanitized)
+                .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                .sourceText(sanitized)
+                .build());
         return true;
     }
 }

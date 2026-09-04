@@ -47,6 +47,14 @@ public class PropertyExtractor {
         if (field == BiodataField.SURNAME) {
             if (ctx.surname == null) {
                 ctx.surname = value;
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(field)
+                        .value(value)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                        .sourceText(value)
+                        .build());
             }
             return;
         }
@@ -54,18 +62,42 @@ public class PropertyExtractor {
         // FULL_NAME: keep the longest value that contains the previous one (handles
         // "Aryan" followed by "Aryan Kumar" → prefer the more complete form)
         if (field == BiodataField.FULL_NAME) {
-            if (ctx.givenName == null) {
+            boolean accepted = false;
+            if (ctx.givenName == null || ctx.givenNameIsHeuristic) {
                 ctx.givenName = value;
+                ctx.givenNameIsHeuristic = false;
+                accepted = true;
             } else if (value.length() > ctx.givenName.length()
                     && value.toLowerCase().contains(ctx.givenName.toLowerCase())) {
                 ctx.givenName = value;
+                accepted = true;
+            }
+            if (accepted) {
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(field)
+                        .value(value)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                        .sourceText(value)
+                        .build());
             }
             return;
         }
 
         // Candidate-level siblings (e.g. "2 Brothers, 1 Sister")
         if (field == BiodataField.SIBLINGS) {
-            ctx.siblingEntries.add(value);
+            if (!ctx.siblingEntries.contains(value)) {
+                ctx.siblingEntries.add(value);
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(field)
+                        .value(value)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.SIBLING)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                        .sourceText(value)
+                        .build());
+            }
             return;
         }
 
@@ -73,6 +105,70 @@ public class PropertyExtractor {
         String currentVal = field.getGetter().apply(ctx.profile);
         if (currentVal == null || currentVal.isBlank()) {
             field.apply(ctx.profile, value);
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(field)
+                    .value(value)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                    .sourceText(value)
+                    .build());
         }
+    }
+
+    /**
+     * Attempts to dynamically capture an unrecognized key-value line into
+     * {@link com.shubham.matrimony.shubham_matrimony_biodata.dto.AdditionalInformation#getCustomAttributes()}.
+     *
+     * <p>Prevents arbitrary non-canonical fields (e.g. {@code "Diet: Pure Vegetarian"},
+     * {@code "Requirements :- Only Software Engineer"}, {@code "Visa status - Permanent Resident GC"},
+     * {@code "Earnings - $ 130 + Stocks"}) from being lost or requiring rigid schema changes.
+     *
+     * @param line sanitized input line
+     * @param ctx  shared parse context
+     * @return {@code true} if captured as a key-value attribute; {@code false} otherwise.
+     */
+    public boolean tryCaptureCustomAttribute(String line, ParseContext ctx) {
+        if (line == null || line.isBlank()) {
+            return false;
+        }
+        String trimmed = line.trim();
+        String[] parts = null;
+        if (trimmed.contains(":-")) {
+            parts = trimmed.split(":-", 2);
+        } else if (trimmed.contains(":")) {
+            parts = trimmed.split(":", 2);
+        } else if (trimmed.contains(" - ")) {
+            parts = trimmed.split("\\s+-\\s+", 2);
+        } else if (trimmed.contains("=")) {
+            parts = trimmed.split("=", 2);
+        }
+
+        if (parts != null && parts.length == 2) {
+            String key = parts[0].replaceAll("^[\\s\\*\\•\\-\\–\\—#\\.\"]+", "")
+                                 .replaceAll("[\\s\\*\\•\\-\\–\\—#\\.\"]+$", "")
+                                 .trim();
+            String val = parts[1].replaceAll("^[\\s:=–—~\\|/\\-\\.\\*\\•#\\)\\]\\}\"\'`]+", "")
+                                 .replaceAll("[\\s,\\|;~–—\\-\\.\\*\\•#\\(\\[\\{\\\"\'`]+$", "")
+                                 .trim();
+
+            if (!key.isBlank() && !val.isBlank() && key.length() <= 50
+                    && !key.toLowerCase().contains("http") && !key.contains("/")) {
+                String[] words = key.split("\\s+");
+                if (words.length <= 6 && !key.endsWith(".")) {
+                    ctx.profile.getAdditionalInfo().getCustomAttributes().put(key, val);
+                    ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                            .field(null)
+                            .value(val)
+                            .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.OTHER)
+                            .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                            .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                            .sourceText(line)
+                            .build());
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

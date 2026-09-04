@@ -61,6 +61,9 @@ public class ParseContext {
     /** Whether the parser is currently inside a grandparents block. */
     public boolean inGrandparentsBlock = false;
 
+    /** Whether the parser is currently inside a partner preferences block. */
+    public boolean inPartnerPreferencesBlock = false;
+
     /**
      * Which family member is currently in scope (Father / Mother / Sibling / …).
      */
@@ -96,6 +99,12 @@ public class ParseContext {
      * post-processing.
      */
     public String givenName = null;
+
+    /**
+     * Whether givenName was populated by an unlabeled heuristic guess (tryExtractUnlabeledName)
+     * rather than an explicit labeled segment (e.g. "Name: ...").
+     */
+    public boolean givenNameIsHeuristic = false;
 
     // ── Sibling accumulator ──────────────────────────────────────────────────
     /**

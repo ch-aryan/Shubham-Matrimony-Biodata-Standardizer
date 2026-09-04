@@ -50,6 +50,9 @@ public class AdditionalInfoExtractor {
     private static final Pattern COUNTRY_PATTERN = Pattern.compile(
             "(?i)^(?:country)[:\\s-]+([a-z\\s]+)$");
 
+    private static final Pattern PARTNER_PREFERENCES_PATTERN = Pattern.compile(
+            "(?i)^(?:partner\\s*preferences?|partner\\s*expectations?)\\s*[:=–—~-]+\\s*(.+)$");
+
     /**
      * Attempts to extract an additional-info segment or multi-line
      * property/grandparent item.
@@ -69,9 +72,10 @@ public class AdditionalInfoExtractor {
 
         // ── 1. Section Header Detection ───────────────────────────────────────
         if (lower.matches(
-                "(?i)^(properties|property|property\\s*details|assets|property\\s*/\\s*assets\\s*details)[:\\s-]*$")) {
+                "(?i)^(properties|property|property\\s*details|assets|property\\s*/\\s*assets(?:\\s*details)?|ఆస్తులు)[:\\s-]*$")) {
             ctx.inPropertiesBlock = true;
             ctx.inGrandparentsBlock = false;
+            ctx.inPartnerPreferencesBlock = false;
             return true;
         }
 
@@ -79,15 +83,23 @@ public class AdditionalInfoExtractor {
                 "(?i)^(grandparents|grandparents\\s*details|paternal\\s*grandparents?|maternal\\s*grandparents?)[:\\s-]*$")) {
             ctx.inGrandparentsBlock = true;
             ctx.inPropertiesBlock = false;
+            ctx.inPartnerPreferencesBlock = false;
             return true;
         }
 
-        // Inline property line: e.g. "Properties: Own house G+1 in Shamshabad..."
-        if (lower.startsWith("properties:") || lower.startsWith("property:")
-                || lower.startsWith("property / assets details:")) {
+        if (lower.matches(
+                "(?i)^(partner\\s*preferences?|partner\\s*expectations?)[:\\s-]*$")) {
+            ctx.inPartnerPreferencesBlock = true;
+            ctx.inPropertiesBlock = false;
+            ctx.inGrandparentsBlock = false;
+            return true;
+        }
+
+        // Inline property line: e.g. "Properties: Own house G+1 in Shamshabad..." or "Property/Assets: Well-settled family (₹9 Cr)"
+        if (lower.matches("(?i)^(?:properties|property|assets|property\\s*/\\s*assets(?:\\s*details)?)\\s*[:=–—~-].*$")) {
             ctx.inPropertiesBlock = true;
             String val = trimmed
-                    .replaceFirst("(?i)^(?:property\\s*/\\s*assets\\s*details|properties|property)[:\\s-]+", "").trim();
+                    .replaceFirst("(?i)^(?:property\\s*/\\s*assets(?:\\s*details)?|properties|property|assets)\\s*[:=–—~-]+", "").trim();
             if (!val.isBlank()) {
                 info.getProperties().add(val);
                 emitEvidence(ExtractionContext.PROPERTY, val, trimmed, ctx);
@@ -96,8 +108,8 @@ public class AdditionalInfoExtractor {
         }
 
         // Inline grandparent line: e.g. "Paternal Grandparents: Sri Kotte..."
-        if (lower.startsWith("paternal grandparent") || lower.startsWith("paternal grandparents:")) {
-            String val = trimmed.replaceFirst("(?i)^paternal\\s*grandparents?['s]*[:\\s-]+", "").trim();
+        if (lower.matches("(?i)^(?:paternal\\s*grandparents?['s]*)\\s*[:=–—~-].*$")) {
+            String val = trimmed.replaceFirst("(?i)^paternal\\s*grandparents?['s]*\\s*[:=–—~-]+", "").trim();
             if (!val.isBlank()) {
                 info.getPaternalGrandparents().add(val);
                 emitEvidence(ExtractionContext.GRANDPARENTS, val, trimmed, ctx);
@@ -105,8 +117,8 @@ public class AdditionalInfoExtractor {
             return true;
         }
 
-        if (lower.startsWith("maternal grandparent") || lower.startsWith("maternal grandparents:")) {
-            String val = trimmed.replaceFirst("(?i)^maternal\\s*grandparents?['s]*[:\\s-]+", "").trim();
+        if (lower.matches("(?i)^(?:maternal\\s*grandparents?['s]*)\\s*[:=–—~-].*$")) {
+            String val = trimmed.replaceFirst("(?i)^maternal\\s*grandparents?['s]*\\s*[:=–—~-]+", "").trim();
             if (!val.isBlank()) {
                 info.getMaternalGrandparents().add(val);
                 emitEvidence(ExtractionContext.GRANDPARENTS, val, trimmed, ctx);
@@ -139,6 +151,21 @@ public class AdditionalInfoExtractor {
                 }
                 info.getPaternalGrandparents().add(trimmed);
                 emitEvidence(ExtractionContext.GRANDPARENTS, trimmed, trimmed, ctx);
+                return true;
+            }
+        }
+
+        if (ctx.inPartnerPreferencesBlock) {
+            if (isOtherSectionHeader(lower)) {
+                ctx.inPartnerPreferencesBlock = false;
+            } else {
+                String existing = info.getPartnerPreferences();
+                if (existing == null || existing.isBlank()) {
+                    info.setPartnerPreferences(trimmed);
+                } else {
+                    info.setPartnerPreferences(existing + "; " + trimmed);
+                }
+                emitEvidence(ExtractionContext.OTHER, trimmed, trimmed, ctx);
                 return true;
             }
         }
@@ -222,6 +249,14 @@ public class AdditionalInfoExtractor {
             return true;
         }
 
+        m = PARTNER_PREFERENCES_PATTERN.matcher(trimmed);
+        if (m.find()) {
+            String val = m.group(1).trim();
+            info.setPartnerPreferences(val);
+            emitEvidence(ExtractionContext.OTHER, val, trimmed, ctx);
+            return true;
+        }
+
         return false;
     }
 
@@ -235,7 +270,10 @@ public class AdditionalInfoExtractor {
                 || lower.startsWith("personal")
                 || lower.startsWith("name:")
                 || lower.startsWith("dob:")
-                || lower.startsWith("date of birth");
+                || lower.startsWith("date of birth")
+                || lower.startsWith("references")
+                || lower.startsWith("contact")
+                || lower.startsWith("disclaimer");
     }
 
     private void emitEvidence(ExtractionContext context, String value, String sourceText, ParseContext ctx) {

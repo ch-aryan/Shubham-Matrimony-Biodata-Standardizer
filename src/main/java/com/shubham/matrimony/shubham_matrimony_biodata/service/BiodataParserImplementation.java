@@ -21,6 +21,9 @@ import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.ScopeTr
 import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField;
 import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataParserUtils;
 import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataParserUtils.ParsedSegment;
+import com.shubham.matrimony.shubham_matrimony_biodata.dto.ConflictRecord;
+import com.shubham.matrimony.shubham_matrimony_biodata.dto.MergeResult;
+import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.ExtractionMerger;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -81,6 +84,7 @@ public class BiodataParserImplementation implements BiodataServiceParser {
     private final AdditionalInfoExtractor additionalInfoExtractor = new AdditionalInfoExtractor();
     private final ConfidenceScorer scorer = new ConfidenceScorer(familyExtractor);
     private final InputQualityValidator validator = new InputQualityValidator();
+    private final ExtractionMerger merger = new ExtractionMerger();
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -107,7 +111,7 @@ public class BiodataParserImplementation implements BiodataServiceParser {
         // Fast-path: blank or null input
         if (rawText == null || rawText.isBlank()) {
             scorer.populateMissingConfidence(confidenceScores);
-            return buildResult(new ParseContext(), confidenceScores);
+            return buildResult(new ParseContext(), confidenceScores, null);
         }
 
         ParseContext ctx = new ParseContext();
@@ -158,6 +162,9 @@ public class BiodataParserImplementation implements BiodataServiceParser {
             // ── Stage 6: label-based segment extraction ───────────────────────
             List<ParsedSegment> segments = BiodataParserUtils.parseTextSegments(sanitized);
             if (segments.isEmpty()) {
+                if (propertyExtractor.tryCaptureCustomAttribute(sanitized, ctx)) {
+                    continue;
+                }
                 if (!BiodataParserUtils.isIgnorableLine(sanitized)) {
                     ctx.unparsedLines.add(sanitized);
                 }
@@ -191,7 +198,13 @@ public class BiodataParserImplementation implements BiodataServiceParser {
 
         // ── Stage 8: post-processing ──────────────────────────────────────────
         scorer.finalizeProfile(ctx, confidenceScores);
-        return buildResult(ctx, confidenceScores);
+        MergeResult mergeResult = merger.merge(ctx.evidenceList, ctx.profile);
+        for (ConflictRecord cr : mergeResult.getConflicts()) {
+            if (cr.getKey() != null && cr.getKey().field() != null) {
+                confidenceScores.put(cr.getKey().field().getPropertyName(), FieldConfidence.CONFLICT);
+            }
+        }
+        return buildResult(ctx, confidenceScores, mergeResult);
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
@@ -230,12 +243,15 @@ public class BiodataParserImplementation implements BiodataServiceParser {
     }
 
     private ExtractionResultDTO buildResult(ParseContext ctx,
-            Map<String, FieldConfidence> confidenceScores) {
+            Map<String, FieldConfidence> confidenceScores,
+            MergeResult mergeResult) {
         return ExtractionResultDTO.builder()
                 .profile(ctx.profile)
                 .confidenceScores(confidenceScores)
                 .unparsedLines(ctx.unparsedLines)
                 .warnings(ctx.warnings)
+                .conflicts(mergeResult != null ? mergeResult.getConflicts() : List.of())
+                .evidenceTrail(ctx.evidenceList)
                 .build();
     }
 }

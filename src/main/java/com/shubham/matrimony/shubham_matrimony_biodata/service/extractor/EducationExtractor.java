@@ -52,6 +52,14 @@ public class EducationExtractor {
             } else if (!existing.contains(item)) {
                 ctx.profile.setQualification(existing + ", " + item);
             }
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(BiodataField.QUALIFICATION)
+                    .value(item)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                    .sourceText(sanitized)
+                    .build());
         }
         return true; // consumed — skip the rest of this line
     }
@@ -90,6 +98,14 @@ public class EducationExtractor {
             } else if (!ctx.profile.getQualification().contains(sanitized)) {
                 ctx.profile.setQualification(ctx.profile.getQualification() + ", " + sanitized);
             }
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(BiodataField.QUALIFICATION)
+                    .value(sanitized)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                    .sourceText(sanitized)
+                    .build());
             return true;
         }
         return false;

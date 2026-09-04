@@ -131,13 +131,40 @@ public class BiodataParserUtils {
         if (val == null) {
             return "";
         }
-        // Remove leading separators, bullets, quotes, brackets
-        String cleaned = val.replaceAll("^[\\s:=–—~\\|/\\-\\.\\*\\•#\\)\\]\\}\"\'`]+", "");
+        // Remove leading separators, bullets, quotes, brackets, commas, semicolons
+        String cleaned = val.replaceAll("^[\\s,;:=–—~\\|/\\-\\.\\*\\•#\\)\\]\\}\"\'`]+", "");
         // Remove trailing separators, commas, quotes, brackets
         cleaned = cleaned.replaceAll("[\\s,\\|;~–—\\-\\.\\*\\•#\\(\\[\\{\\\"\'`]+$", "");
         // Collapse multiple whitespace
         cleaned = cleaned.replaceAll("\\s+", " ").trim();
         return cleaned;
+    }
+
+    public static String stripEmojisAndDecorativeSymbols(String text) {
+        if (text == null || text.isBlank()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < text.length(); ) {
+            int cp = text.codePointAt(i);
+            if (cp > 0xFFFF) {
+                sb.append(' ');
+            } else {
+                char c = (char) cp;
+                int type = Character.getType(cp);
+                if (type == Character.OTHER_SYMBOL || (cp >= 0x2600 && cp <= 0x27BF) || cp == 0xFE0E || cp == 0xFE0F) {
+                    if (c == '₹' || c == '$' || c == '€' || c == '£') {
+                        sb.append(c);
+                    } else {
+                        sb.append(' ');
+                    }
+                } else {
+                    sb.append(c);
+                }
+            }
+            i += Character.charCount(cp);
+        }
+        return sb.toString().replaceAll("\\s+", " ").trim();
     }
 
     public static String sanitizeLine(String line) {
@@ -150,6 +177,9 @@ public class BiodataParserUtils {
                 .replaceAll("^\\d{1,2}/\\d{1,2}/\\d{2,4},\\s*\\d{1,2}:\\d{2}\\s*(?:am|pm|AM|PM)?\\s*-\\s*[^:]+:\\s*",
                         "")
                 .replaceAll("[\\u200B\\uFEFF]", ""); // Strip zero-width space and BOM, preserve Indic ZWNJ/ZWJ
+
+        cleaned = stripEmojisAndDecorativeSymbols(cleaned);
+
         return stripLeadingBullets(cleaned);
     }
 
@@ -231,6 +261,9 @@ public class BiodataParserUtils {
             return true;
         }
         char next = text.charAt(index);
+        if ((next == '\'' || next == '’') && index + 1 < text.length() && Character.isLetter(text.charAt(index + 1))) {
+            return false;
+        }
         return isSeparatorOrWhitespace(next) || next == ')' || next == ']' || next == '}' || next == '.' || next == ','
                 || next == '"' || next == '\'' || next == '`';
     }

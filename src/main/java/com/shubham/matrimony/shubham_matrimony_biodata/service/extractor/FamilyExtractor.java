@@ -45,8 +45,25 @@ public class FamilyExtractor {
             int spaceIdx = parts[0].indexOf(' ');
             String pName = spaceIdx != -1 ? parts[0].substring(spaceIdx + 1).trim() : parts[0].trim();
             ctx.profile.setFatherName(pName);
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FATHER_NAME)
+                    .value(pName)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.FATHER)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                    .sourceText(sanitized)
+                    .build());
             if (parts.length > 1) {
-                ctx.profile.setFatherOccupation(parts[1].trim());
+                String fJob = parts[1].trim();
+                ctx.profile.setFatherOccupation(fJob);
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FATHER_OCCUPATION)
+                        .value(fJob)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.FATHER)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                        .sourceText(sanitized)
+                        .build());
             }
             return true;
         }
@@ -55,8 +72,25 @@ public class FamilyExtractor {
             int spaceIdx = parts[0].indexOf(' ');
             String mName = spaceIdx != -1 ? parts[0].substring(spaceIdx + 1).trim() : parts[0].trim();
             ctx.profile.setMotherName(mName);
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.MOTHER_NAME)
+                    .value(mName)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.MOTHER)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                    .sourceText(sanitized)
+                    .build());
             if (parts.length > 1) {
-                ctx.profile.setMotherOccupation(parts[1].trim());
+                String mJob = parts[1].trim();
+                ctx.profile.setMotherOccupation(mJob);
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.MOTHER_OCCUPATION)
+                        .value(mJob)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.MOTHER)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                        .sourceText(sanitized)
+                        .build());
             }
             return true;
         }
@@ -86,6 +120,14 @@ public class FamilyExtractor {
                 || lower.startsWith("consultant") || lower.startsWith("employee")
                 || lower.startsWith("advocate") || lower.startsWith("doctor")) {
             ctx.profile.setFatherOccupation(sanitized);
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FATHER_OCCUPATION)
+                    .value(sanitized)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.FATHER)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                    .sourceText(sanitized)
+                    .build());
             return true;
         }
         return false;
@@ -108,6 +150,14 @@ public class FamilyExtractor {
                 || sanitized.equalsIgnoreCase("home maker") || sanitized.equals("గృహిణి")) {
             if (ctx.profile.getMotherOccupation() == null || ctx.profile.getMotherOccupation().isBlank()) {
                 ctx.profile.setMotherOccupation(sanitized);
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.MOTHER_OCCUPATION)
+                        .value(sanitized)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.MOTHER)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                        .sourceText(sanitized)
+                        .build());
                 return true;
             }
         }
@@ -160,13 +210,35 @@ public class FamilyExtractor {
                 String[] parts = value.split("\\s+-\\s+", 2);
                 fName = parts[0].trim();
                 fJob = parts[1].trim();
+            } else if (isObviousFatherJob(value)) {
+                fName = null;
+                fJob = value;
             }
-            if (ctx.profile.getFatherName() == null || ctx.profile.getFatherName().isBlank()) {
-                ctx.profile.setFatherName(fName);
+            if (fName != null && !fName.isBlank()) {
+                if (ctx.profile.getFatherName() == null || ctx.profile.getFatherName().isBlank()) {
+                    ctx.profile.setFatherName(fName);
+                }
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FATHER_NAME)
+                        .value(fName)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.FATHER)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                        .sourceText(value)
+                        .build());
             }
-            if (fJob != null
-                    && (ctx.profile.getFatherOccupation() == null || ctx.profile.getFatherOccupation().isBlank())) {
-                ctx.profile.setFatherOccupation(fJob);
+            if (fJob != null && !fJob.isBlank()) {
+                if (ctx.profile.getFatherOccupation() == null || ctx.profile.getFatherOccupation().isBlank()) {
+                    ctx.profile.setFatherOccupation(fJob);
+                }
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FATHER_OCCUPATION)
+                        .value(fJob)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.FATHER)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                        .sourceText(value)
+                        .build());
             }
             ctx.inFamilyBlock = true;
             ctx.section = ParseContext.FamilySection.FATHER;
@@ -177,6 +249,14 @@ public class FamilyExtractor {
             if (ctx.profile.getFatherOccupation() == null || ctx.profile.getFatherOccupation().isBlank()) {
                 ctx.profile.setFatherOccupation(value);
             }
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FATHER_OCCUPATION)
+                    .value(value)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.FATHER)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                    .sourceText(value)
+                    .build());
             ctx.inFamilyBlock = true;
             ctx.section = ParseContext.FamilySection.FATHER;
             return true;
@@ -197,13 +277,35 @@ public class FamilyExtractor {
                 String[] parts = value.split("\\s+-\\s+", 2);
                 mName = parts[0].trim();
                 mJob = parts[1].trim();
+            } else if (isObviousMotherJob(value)) {
+                mName = null;
+                mJob = value;
             }
-            if (ctx.profile.getMotherName() == null || ctx.profile.getMotherName().isBlank()) {
-                ctx.profile.setMotherName(mName);
+            if (mName != null && !mName.isBlank()) {
+                if (ctx.profile.getMotherName() == null || ctx.profile.getMotherName().isBlank()) {
+                    ctx.profile.setMotherName(mName);
+                }
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.MOTHER_NAME)
+                        .value(mName)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.MOTHER)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                        .sourceText(value)
+                        .build());
             }
-            if (mJob != null
-                    && (ctx.profile.getMotherOccupation() == null || ctx.profile.getMotherOccupation().isBlank())) {
-                ctx.profile.setMotherOccupation(mJob);
+            if (mJob != null && !mJob.isBlank()) {
+                if (ctx.profile.getMotherOccupation() == null || ctx.profile.getMotherOccupation().isBlank()) {
+                    ctx.profile.setMotherOccupation(mJob);
+                }
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.MOTHER_OCCUPATION)
+                        .value(mJob)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.MOTHER)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                        .sourceText(value)
+                        .build());
             }
             ctx.inFamilyBlock = true;
             ctx.section = ParseContext.FamilySection.MOTHER;
@@ -214,6 +316,14 @@ public class FamilyExtractor {
             if (ctx.profile.getMotherOccupation() == null || ctx.profile.getMotherOccupation().isBlank()) {
                 ctx.profile.setMotherOccupation(value);
             }
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.MOTHER_OCCUPATION)
+                    .value(value)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.MOTHER)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                    .sourceText(value)
+                    .build());
             ctx.inFamilyBlock = true;
             ctx.section = ParseContext.FamilySection.MOTHER;
             return true;
@@ -247,6 +357,14 @@ public class FamilyExtractor {
             if (ctx.profile.getNativePlace() == null || ctx.profile.getNativePlace().isBlank()) {
                 ctx.profile.setNativePlace(value);
             }
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.NATIVE_PLACE)
+                    .value(value)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                    .sourceText(value)
+                    .build());
             return true;
         }
 
@@ -255,6 +373,14 @@ public class FamilyExtractor {
                 if (ctx.profile.getCurrentLocation() == null || ctx.profile.getCurrentLocation().isBlank()) {
                     ctx.profile.setCurrentLocation(value);
                 }
+                ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                        .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.CURRENT_LOCATION)
+                        .value(value)
+                        .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                        .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                        .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                        .sourceText(value)
+                        .build());
             } else if (ctx.section == ParseContext.FamilySection.SIBLING) {
                 ctx.profile.getAdditionalInfo().getExtendedFamily().add("Sibling Location: " + value);
             }
@@ -267,18 +393,42 @@ public class FamilyExtractor {
                 if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FULL_NAME
                         && (ctx.profile.getFatherName() == null || ctx.profile.getFatherName().isBlank())) {
                     ctx.profile.setFatherName(value);
+                    ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                            .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FATHER_NAME)
+                            .value(value)
+                            .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.FATHER)
+                            .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                            .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                            .sourceText(value)
+                            .build());
                     return true;
                 }
             } else if (ctx.section == ParseContext.FamilySection.MOTHER) {
                 if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FULL_NAME
                         && (ctx.profile.getMotherName() == null || ctx.profile.getMotherName().isBlank())) {
                     ctx.profile.setMotherName(value);
+                    ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                            .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.MOTHER_NAME)
+                            .value(value)
+                            .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.MOTHER)
+                            .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                            .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                            .sourceText(value)
+                            .build());
                     return true;
                 }
             } else if (ctx.section == ParseContext.FamilySection.SIBLING) {
                 if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FULL_NAME) {
                     if (ctx.currentSiblingName == null) {
                         ctx.currentSiblingName = value;
+                        ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                                .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FULL_NAME)
+                                .value(value)
+                                .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.SIBLING)
+                                .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                                .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                                .sourceText(value)
+                                .build());
                         return true;
                     } else {
                         // Sibling name already set (e.g. Spouse Name: Akula Vinayak)
@@ -305,6 +455,14 @@ public class FamilyExtractor {
                     if (!ctx.siblingEntries.contains(value)) {
                         ctx.siblingEntries.add(value);
                     }
+                    ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                            .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.SIBLINGS)
+                            .value(value)
+                            .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.SIBLING)
+                            .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                            .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                            .sourceText(value)
+                            .build());
                     return true;
                 }
             }
@@ -323,10 +481,22 @@ public class FamilyExtractor {
      * {@link ParseContext#siblingEntries}.
      */
     public void flushCurrentSibling(ParseContext ctx) {
+        int before = ctx.siblingEntries.size();
         flushSibling(ctx.siblingEntries,
                 ctx.currentSiblingRelation,
                 ctx.currentSiblingName,
                 ctx.currentSiblingJob);
+        if (ctx.siblingEntries.size() > before) {
+            String added = ctx.siblingEntries.get(ctx.siblingEntries.size() - 1);
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.SIBLINGS)
+                    .value(added)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.SIBLING)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                    .sourceText(added)
+                    .build());
+        }
     }
 
     /**
@@ -423,5 +593,29 @@ public class FamilyExtractor {
         if (lowerLine.contains("status") || lowerLine.contains("details"))
             return null;
         return "Sibling";
+    }
+
+    private boolean isObviousFatherJob(String val) {
+        if (val == null || val.isBlank()) return false;
+        String lower = val.toLowerCase().trim();
+        return lower.startsWith("business") || lower.startsWith("rtd") || lower.startsWith("retired")
+                || lower.startsWith("farmer") || lower.startsWith("govt") || lower.startsWith("private")
+                || lower.startsWith("employee") || lower.startsWith("officer") || lower.startsWith("advocate")
+                || lower.startsWith("doctor") || lower.startsWith("teacher") || lower.startsWith("engineer")
+                || lower.startsWith("coo") || lower.startsWith("ceo") || lower.startsWith("manager")
+                || lower.equals("late") || lower.equals("expired");
+    }
+
+    private boolean isObviousMotherJob(String val) {
+        if (val == null || val.isBlank()) return false;
+        String lower = val.toLowerCase().trim();
+        return lower.startsWith("housewife") || lower.startsWith("house wife")
+                || lower.startsWith("homemaker") || lower.startsWith("home maker")
+                || lower.startsWith("గృహిణి")
+                || lower.startsWith("business") || lower.startsWith("rtd") || lower.startsWith("retired")
+                || lower.startsWith("teacher") || lower.startsWith("govt") || lower.startsWith("private")
+                || lower.startsWith("employee") || lower.startsWith("officer") || lower.startsWith("advocate")
+                || lower.startsWith("doctor")
+                || lower.equals("late") || lower.equals("expired");
     }
 }
