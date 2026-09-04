@@ -75,8 +75,10 @@ public class SatwikDiagnosticTest {
         org.junit.jupiter.api.Assertions.assertEquals("Sri Kotte Srisailam", p.getFatherName());
         org.junit.jupiter.api.Assertions.assertEquals("Smt. Pusphalatha", p.getMotherName());
         org.junit.jupiter.api.Assertions.assertEquals("Never Married", p.getAdditionalInfo().getMaritalStatus());
-        org.junit.jupiter.api.Assertions.assertEquals("Elder Sister: Kotte Sahithi (Software Engineer (Cognizant))", p.getSiblingsDetails());
-        org.junit.jupiter.api.Assertions.assertTrue(p.getAdditionalInfo().getProperties().contains("Well-settled family"));
+        org.junit.jupiter.api.Assertions.assertEquals("Elder Sister: Kotte Sahithi (Software Engineer (Cognizant))",
+                p.getSiblingsDetails());
+        org.junit.jupiter.api.Assertions
+                .assertTrue(p.getAdditionalInfo().getProperties().contains("Well-settled family"));
         org.junit.jupiter.api.Assertions.assertFalse(p.getFullName().contains("Vinayak"));
         org.junit.jupiter.api.Assertions.assertFalse(p.getSiblingsDetails().contains("Vinayak"));
         org.junit.jupiter.api.Assertions.assertFalse(p.getSiblingsDetails().contains("Status"));

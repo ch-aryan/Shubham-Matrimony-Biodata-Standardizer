@@ -232,7 +232,8 @@ public class FamilyExtractor {
                 || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.SALARY
                 || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.COMPANY) {
 
-            // Outside JSON braces, encountering candidate core fields means family section has ended
+            // Outside JSON braces, encountering candidate core fields means family section
+            // has ended
             if (ctx.braceDepth <= 0) {
                 ctx.inFamilyBlock = false;
                 ctx.section = ParseContext.FamilySection.NONE;
@@ -285,16 +286,19 @@ public class FamilyExtractor {
                         return true;
                     }
                 } else if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.SIBLINGS) {
-                    // Guard: ignore header noise like "& Marital Status:", fragments like "Elder", "Younger", "Sibling"
+                    // Guard: ignore header noise like "& Marital Status:", fragments like "Elder",
+                    // "Younger", "Sibling"
                     String valLower = value.toLowerCase().trim();
                     if (value.startsWith("&") || valLower.contains("status") || valLower.contains("details")
                             || valLower.equals("elder") || valLower.equals("younger")
                             || valLower.equals("sibling") || valLower.equals("siblings")) {
                         return true;
                     }
-                    // If it is just a relation string, update current relation instead of polluting entries
+                    // If it is just a relation string, update current relation instead of polluting
+                    // entries
                     String rel = extractSiblingRelation(valLower);
-                    if (rel != null && !"Sibling".equalsIgnoreCase(rel) && !value.contains(",") && !value.matches(".*\\d+.*")) {
+                    if (rel != null && !"Sibling".equalsIgnoreCase(rel) && !value.contains(",")
+                            && !value.matches(".*\\d+.*")) {
                         ctx.currentSiblingRelation = rel;
                         return true;
                     }
@@ -370,7 +374,8 @@ public class FamilyExtractor {
             }
             String entry = sb.toString().trim();
             if (!entry.isBlank()) {
-                // If this full entry has name/job, remove any prior bare relation-only duplicate
+                // If this full entry has name/job, remove any prior bare relation-only
+                // duplicate
                 if (name != null || job != null) {
                     if (relation != null) {
                         entries.remove(relation);

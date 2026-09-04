@@ -72,7 +72,8 @@ public class BiodataParserUtils {
                 }
             }
         }
-        // Sort rules so longer aliases come first, and higher priority fields come first on tie
+        // Sort rules so longer aliases come first, and higher priority fields come
+        // first on tie
         rules.sort((r1, r2) -> {
             int lenComp = Integer.compare(r2.getAlias().length(), r1.getAlias().length());
             if (lenComp != 0) {
@@ -143,10 +144,12 @@ public class BiodataParserUtils {
         if (line == null) {
             return "";
         }
-        // Strip WhatsApp timestamp prefixes like "[02/11/26, 10:30 AM] Sender: " or "02/11/26, 10:30 am - Sender: "
+        // Strip WhatsApp timestamp prefixes like "[02/11/26, 10:30 AM] Sender: " or
+        // "02/11/26, 10:30 am - Sender: "
         String cleaned = line.replaceAll("^\\[.*?\\]\\s*[^:]+:\\s*", "")
-                             .replaceAll("^\\d{1,2}/\\d{1,2}/\\d{2,4},\\s*\\d{1,2}:\\d{2}\\s*(?:am|pm|AM|PM)?\\s*-\\s*[^:]+:\\s*", "")
-                             .replaceAll("[\\u200B\\uFEFF]", ""); // Strip zero-width space and BOM, preserve Indic ZWNJ/ZWJ
+                .replaceAll("^\\d{1,2}/\\d{1,2}/\\d{2,4},\\s*\\d{1,2}:\\d{2}\\s*(?:am|pm|AM|PM)?\\s*-\\s*[^:]+:\\s*",
+                        "")
+                .replaceAll("[\\u200B\\uFEFF]", ""); // Strip zero-width space and BOM, preserve Indic ZWNJ/ZWJ
         return stripLeadingBullets(cleaned);
     }
 
@@ -161,8 +164,8 @@ public class BiodataParserUtils {
         }
         // Common standalone section headers that don't hold field values
         String strippedHeader = trimmed.replaceAll("^[\\*\\-=_~#\\.\\s]+", "")
-                                       .replaceAll("[\\*\\-=_~#\\.\\s:]+$", "")
-                                       .toLowerCase();
+                .replaceAll("[\\*\\-=_~#\\.\\s:]+$", "")
+                .toLowerCase();
         if (strippedHeader.equals("biodata") || strippedHeader.equals("bio-data") || strippedHeader.equals("bio data")
                 || strippedHeader.equals("matrimonial biodata") || strippedHeader.equals("personal details")
                 || strippedHeader.equals("candidate details")
@@ -170,7 +173,8 @@ public class BiodataParserUtils {
                 || strippedHeader.equals("family details") || strippedHeader.equals("horoscope details")
                 || strippedHeader.equals("educational details") || strippedHeader.equals("professional details")
                 || strippedHeader.equals("educational and professional details")
-                || strippedHeader.equals("sibling & marital status") || strippedHeader.equals("sibling and marital status")
+                || strippedHeader.equals("sibling & marital status")
+                || strippedHeader.equals("sibling and marital status")
                 || strippedHeader.equals("family background") || strippedHeader.equals("contact details")
                 || strippedHeader.equals("కుటుంబ వివరాలు") || strippedHeader.equals("వ్యక్తిగత వివరాలు")
                 || strippedHeader.equals("{") || strippedHeader.equals("}") || strippedHeader.equals("},")
@@ -203,12 +207,13 @@ public class BiodataParserUtils {
         }
         // Strip bullets like "1.", "1)", "*", "•", "-", etc.
         return line.replaceAll("^[\\s\\*\\•\\-\\–\\—#]+", "")
-                   .replaceAll("^\\d+[\\.\\)]\\s*", "")
-                   .trim();
+                .replaceAll("^\\d+[\\.\\)]\\s*", "")
+                .trim();
     }
 
     private static boolean isSeparatorOrWhitespace(char c) {
-        return Character.isWhitespace(c) || c == ':' || c == '=' || c == '-' || c == '–' || c == '—' || c == '~' || c == '|' || c == ';' || c == ',';
+        return Character.isWhitespace(c) || c == ':' || c == '=' || c == '-' || c == '–' || c == '—' || c == '~'
+                || c == '|' || c == ';' || c == ',';
     }
 
     private static boolean isBoundaryBefore(String text, int index) {
@@ -216,7 +221,9 @@ public class BiodataParserUtils {
             return true;
         }
         char prev = text.charAt(index - 1);
-        return Character.isWhitespace(prev) || prev == '|' || prev == ',' || prev == ';' || prev == '\n' || prev == '\r' || prev == '\t' || prev == '•' || prev == '*' || prev == '(' || prev == '[' || prev == '{' || prev == '-' || prev == '#' || prev == '.' || prev == '"' || prev == '\'' || prev == '`';
+        return Character.isWhitespace(prev) || prev == '|' || prev == ',' || prev == ';' || prev == '\n' || prev == '\r'
+                || prev == '\t' || prev == '•' || prev == '*' || prev == '(' || prev == '[' || prev == '{'
+                || prev == '-' || prev == '#' || prev == '.' || prev == '"' || prev == '\'' || prev == '`';
     }
 
     private static boolean isBoundaryAfter(String text, int index) {
@@ -224,7 +231,8 @@ public class BiodataParserUtils {
             return true;
         }
         char next = text.charAt(index);
-        return isSeparatorOrWhitespace(next) || next == ')' || next == ']' || next == '}' || next == '.' || next == ',' || next == '"' || next == '\'' || next == '`';
+        return isSeparatorOrWhitespace(next) || next == ')' || next == ']' || next == '}' || next == '.' || next == ','
+                || next == '"' || next == '\'' || next == '`';
     }
 
     public static List<ParsedSegment> parseTextSegments(String text) {
@@ -293,4 +301,4 @@ public class BiodataParserUtils {
 
         return segments;
     }
-}
+}

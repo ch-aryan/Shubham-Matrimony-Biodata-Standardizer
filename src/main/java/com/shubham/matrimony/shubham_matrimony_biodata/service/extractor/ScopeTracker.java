@@ -3,18 +3,20 @@ package com.shubham.matrimony.shubham_matrimony_biodata.service.extractor;
 /**
  * Maintains the brace-depth and family-block scope in {@link ParseContext}.
  *
- * <p>The tracker is called in <strong>two phases</strong> per line to honour the exact
+ * <p>
+ * The tracker is called in <strong>two phases</strong> per line to honour the
+ * exact
  * order the original single-class engine used:
  *
  * <ol>
- *   <li>{@link #updateEarly(String, String, ParseContext)} — <em>before</em> the
- *       ignorable/conversational skip checks.
- *       Resets {@code inArrayField} on {@code ]}, counts braces, and detects
- *       family-block entry and exit.</li>
- *   <li>{@link #updateLate(String, String, ParseContext)} — <em>after</em> the
- *       multi-line array item check.
- *       Transitions the family sub-section (Father / Mother / Sibling) and
- *       flushes a completed sibling record when a closing brace is encountered.</li>
+ * <li>{@link #updateEarly(String, String, ParseContext)} — <em>before</em> the
+ * ignorable/conversational skip checks.
+ * Resets {@code inArrayField} on {@code ]}, counts braces, and detects
+ * family-block entry and exit.</li>
+ * <li>{@link #updateLate(String, String, ParseContext)} — <em>after</em> the
+ * multi-line array item check.
+ * Transitions the family sub-section (Father / Mother / Sibling) and
+ * flushes a completed sibling record when a closing brace is encountered.</li>
  * </ol>
  */
 public class ScopeTracker {
@@ -22,7 +24,8 @@ public class ScopeTracker {
     private final FamilyExtractor familyExtractor;
 
     /**
-     * @param familyExtractor used by the late-update phase to flush/classify siblings
+     * @param familyExtractor used by the late-update phase to flush/classify
+     *                        siblings
      */
     public ScopeTracker(FamilyExtractor familyExtractor) {
         this.familyExtractor = familyExtractor;
@@ -31,19 +34,24 @@ public class ScopeTracker {
     // ── Phase 1 ───────────────────────────────────────────────────────────────
 
     /**
-     * Early scope update — call this <em>before</em> the ignorable/conversational checks.
+     * Early scope update — call this <em>before</em> the ignorable/conversational
+     * checks.
      *
-     * <p>Actions (in order):
+     * <p>
+     * Actions (in order):
      * <ol>
-     *   <li>Resets {@code ctx.inArrayField} when {@code rawLine} contains {@code ]}.</li>
-     *   <li>Increments / decrements brace depth (clamped at 0 to guard malformed input).</li>
-     *   <li>Enters the family block when a family-header keyword is detected.</li>
-     *   <li>Exits the family block when brace depth falls below the entry depth.</li>
-     *   <li>Exits the family block when a section-exit keyword is detected
-     *       (partner preference, contact details, disclaimer, etc.).</li>
+     * <li>Resets {@code ctx.inArrayField} when {@code rawLine} contains
+     * {@code ]}.</li>
+     * <li>Increments / decrements brace depth (clamped at 0 to guard malformed
+     * input).</li>
+     * <li>Enters the family block when a family-header keyword is detected.</li>
+     * <li>Exits the family block when brace depth falls below the entry depth.</li>
+     * <li>Exits the family block when a section-exit keyword is detected
+     * (partner preference, contact details, disclaimer, etc.).</li>
      * </ol>
      *
-     * @param rawLine   original unsanitized line (used for {@code ]} and brace counting)
+     * @param rawLine   original unsanitized line (used for {@code ]} and brace
+     *                  counting)
      * @param lowerLine lowercased sanitized line (used for keyword matching)
      * @param ctx       shared parse context to update
      */
@@ -69,13 +77,14 @@ public class ScopeTracker {
             ctx.familyBraceDepth = ctx.braceDepth;
             ctx.section = ParseContext.FamilySection.OTHER_FAMILY;
 
-        // Exit family block when brace depth drops below the depth at which we entered
+            // Exit family block when brace depth drops below the depth at which we entered
         } else if (ctx.familyBraceDepth != -1 && ctx.braceDepth < ctx.familyBraceDepth) {
             ctx.inFamilyBlock = false;
             ctx.familyBraceDepth = -1;
             ctx.section = ParseContext.FamilySection.NONE;
 
-        // Exit family block on section-exit keywords (partner preferences, contact, etc.)
+            // Exit family block on section-exit keywords (partner preferences, contact,
+            // etc.)
         } else if (ctx.braceDepth <= 0
                 && (lowerLine.contains("partner") || lowerLine.contains("preference")
                         || lowerLine.contains("references") || lowerLine.contains("disclaimer")
@@ -94,15 +103,16 @@ public class ScopeTracker {
      * Late scope update — call this <em>after</em> the multi-line array item check
      * and <em>before</em> the standalone heuristics.
      *
-     * <p>Actions (in order):
+     * <p>
+     * Actions (in order):
      * <ol>
-     *   <li>Switches sub-section to OTHER_FAMILY on grandparent keywords.</li>
-     *   <li>Switches sub-section to FATHER on father keywords.</li>
-     *   <li>Switches sub-section to MOTHER on mother keywords.</li>
-     *   <li>Switches sub-section to SIBLING on sibling keywords, flushing the
-     *       previously buffered sibling record first.</li>
-     *   <li>Flushes a completed sibling record when a closing brace line is seen
-     *       while the parser is in the SIBLING section.</li>
+     * <li>Switches sub-section to OTHER_FAMILY on grandparent keywords.</li>
+     * <li>Switches sub-section to FATHER on father keywords.</li>
+     * <li>Switches sub-section to MOTHER on mother keywords.</li>
+     * <li>Switches sub-section to SIBLING on sibling keywords, flushing the
+     * previously buffered sibling record first.</li>
+     * <li>Flushes a completed sibling record when a closing brace line is seen
+     * while the parser is in the SIBLING section.</li>
      * </ol>
      *
      * @param sanitized sanitized current line
@@ -153,4 +163,3 @@ public class ScopeTracker {
         }
     }
 }
-
