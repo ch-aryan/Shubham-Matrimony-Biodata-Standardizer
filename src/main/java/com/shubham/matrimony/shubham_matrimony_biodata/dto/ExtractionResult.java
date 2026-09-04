@@ -9,11 +9,15 @@ import lombok.NoArgsConstructor;
 /**
  * Represents a single atomic piece of extracted evidence from a biodata.
  *
- * <p>Rather than directly mutating {@link ProfileBiodata}, extractors emit
+ * <p>
+ * Rather than directly mutating {@link ProfileBiodata}, extractors emit
  * {@code ExtractionResult} instances. Downstream, an {@code ExtractionMerger}
- * collects all evidence, resolves conflicts, and produces the canonical profile.
+ * collects all evidence, resolves conflicts, and produces the canonical
+ * profile.
  *
- * <p>Example:
+ * <p>
+ * Example:
+ * 
  * <pre>{@code
  * ExtractionResult evidence = ExtractionResult.builder()
  *         .field(BiodataField.FULL_NAME)
@@ -37,13 +41,19 @@ public class ExtractionResult {
     /** The extracted value. */
     private String value;
 
-    /** The entity/scope this information belongs to (e.g. CANDIDATE, FATHER, SIBLING). */
+    /**
+     * The entity/scope this information belongs to (e.g. CANDIDATE, FATHER,
+     * SIBLING).
+     */
     private ExtractionContext context;
 
     /** The certainty level of this extraction. */
     private FieldConfidence confidence;
 
-    /** The technique used to extract this value (e.g. DETERMINISTIC, FUZZY, SEMANTIC_AI). */
+    /**
+     * The technique used to extract this value (e.g. DETERMINISTIC, FUZZY,
+     * SEMANTIC_AI).
+     */
     private ExtractionMethod method;
 
     /** The original raw line or snippet from which this value was derived. */

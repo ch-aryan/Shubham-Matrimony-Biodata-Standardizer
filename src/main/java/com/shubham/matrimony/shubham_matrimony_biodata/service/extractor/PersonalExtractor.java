@@ -97,7 +97,8 @@ public class PersonalExtractor {
         if (words.length < 1 || words.length > 4
                 || lowerLine.contains("details") || lowerLine.contains("biodata")
                 || lowerLine.contains("profile") || lowerLine.contains("born")
-                || lowerLine.contains("ft")) {
+                || lowerLine.contains("ft") || lowerLine.contains("confidential")
+                || lowerLine.contains("page")) {
             return false;
         }
 
@@ -111,6 +112,7 @@ public class PersonalExtractor {
         }
 
         ctx.profile.setFullName(sanitized);
+        ctx.givenName = sanitized;
         return true;
     }
 }

@@ -161,12 +161,16 @@ public class BiodataParserUtils {
         }
         // Common standalone section headers that don't hold field values
         String strippedHeader = trimmed.replaceAll("^[\\*\\-=_~#\\.\\s]+", "")
-                                       .replaceAll("[\\*\\-=_~#\\.\\s]+$", "")
+                                       .replaceAll("[\\*\\-=_~#\\.\\s:]+$", "")
                                        .toLowerCase();
         if (strippedHeader.equals("biodata") || strippedHeader.equals("bio-data") || strippedHeader.equals("bio data")
                 || strippedHeader.equals("matrimonial biodata") || strippedHeader.equals("personal details")
+                || strippedHeader.equals("candidate details")
+                || strippedHeader.equals("confidential") || strippedHeader.matches("^page\\s*\\d+\\s*(?:of|/)\\s*\\d+$")
                 || strippedHeader.equals("family details") || strippedHeader.equals("horoscope details")
                 || strippedHeader.equals("educational details") || strippedHeader.equals("professional details")
+                || strippedHeader.equals("educational and professional details")
+                || strippedHeader.equals("sibling & marital status") || strippedHeader.equals("sibling and marital status")
                 || strippedHeader.equals("family background") || strippedHeader.equals("contact details")
                 || strippedHeader.equals("కుటుంబ వివరాలు") || strippedHeader.equals("వ్యక్తిగత వివరాలు")
                 || strippedHeader.equals("{") || strippedHeader.equals("}") || strippedHeader.equals("},")

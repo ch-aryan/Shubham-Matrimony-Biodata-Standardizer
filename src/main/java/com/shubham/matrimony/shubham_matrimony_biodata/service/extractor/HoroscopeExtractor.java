@@ -9,14 +9,18 @@ import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField;
 /**
  * Dedicated extractor for Horoscope attributes: Rashi, Nakshatram, and Gothram.
  *
- * <p>Responsibilities:
+ * <p>
+ * Responsibilities:
  * <ul>
- *   <li>Cleans trailing redundant label suffixes (e.g. {@code "Thula rashi"} → {@code "Thula"},
- *       {@code "Makha nakshatram"} → {@code "Makha"}).</li>
- *   <li>Handles compound horoscope lines where both Rashi and Nakshatram appear in a single segment
- *       (e.g. {@code "Simha rasi, Makha nakshatram"}).</li>
- *   <li>Emits atomic {@link ExtractionResult} evidence into {@link ParseContext#emit} while preserving
- *       direct profile mutation for backwards compatibility during migration.</li>
+ * <li>Cleans trailing redundant label suffixes (e.g. {@code "Thula rashi"} →
+ * {@code "Thula"},
+ * {@code "Makha nakshatram"} → {@code "Makha"}).</li>
+ * <li>Handles compound horoscope lines where both Rashi and Nakshatram appear
+ * in a single segment
+ * (e.g. {@code "Simha rasi, Makha nakshatram"}).</li>
+ * <li>Emits atomic {@link ExtractionResult} evidence into
+ * {@link ParseContext#emit} while preserving
+ * direct profile mutation for backwards compatibility during migration.</li>
  * </ul>
  */
 public class HoroscopeExtractor {
@@ -27,7 +31,8 @@ public class HoroscopeExtractor {
      * @param field the candidate field enum
      * @param value the extracted segment value
      * @param ctx   shared parse context
-     * @return {@code true} if this segment was handled as a horoscope field; {@code false} otherwise.
+     * @return {@code true} if this segment was handled as a horoscope field;
+     *         {@code false} otherwise.
      */
     public boolean tryApply(BiodataField field, String value, ParseContext ctx) {
         if (field == BiodataField.RASHI) {
@@ -49,8 +54,10 @@ public class HoroscopeExtractor {
     }
 
     private void applyRashi(String value, ParseContext ctx) {
-        // Check if value contains both Rashi and Nakshatram (e.g. "Simha rasi, Makha nakshatram")
-        if (value.contains(",") || value.toLowerCase().contains("nakshatra") || value.toLowerCase().contains("star") || value.toLowerCase().contains("nakhsathram")) {
+        // Check if value contains both Rashi and Nakshatram (e.g. "Simha rasi, Makha
+        // nakshatram")
+        if (value.contains(",") || value.toLowerCase().contains("nakshatra") || value.toLowerCase().contains("star")
+                || value.toLowerCase().contains("nakhsathram")) {
             String[] parts = value.split("[,&|]+");
             for (String part : parts) {
                 String trimmed = part.trim();
@@ -148,10 +155,15 @@ public class HoroscopeExtractor {
 
     private String cleanNakshatramSuffix(String val) {
         String trimmed = val.trim();
-        // Remove trailing "nakshatram", "nakshathram", "nakhsathram", "nakshtram", "nakshatra", "star", etc.
-        String cleaned = trimmed.replaceAll("(?i)\\s+(nakshatram|nakshathram|nakhsathram|nakshtram|nakshatra|star|నక్షత్రం)$", "").trim();
+        // Remove trailing "nakshatram", "nakshathram", "nakhsathram", "nakshtram",
+        // "nakshatra", "star", etc.
+        String cleaned = trimmed
+                .replaceAll("(?i)\\s+(nakshatram|nakshathram|nakhsathram|nakshtram|nakshatra|star|నక్షత్రం)$", "")
+                .trim();
         // Remove leading "star:", "nakshatram:", etc. if present
-        cleaned = cleaned.replaceAll("(?i)^(nakshatram|nakshathram|nakhsathram|nakshtram|nakshatra|star|నక్షత్రం)[:\\s-]+", "").trim();
+        cleaned = cleaned
+                .replaceAll("(?i)^(nakshatram|nakshathram|nakhsathram|nakshtram|nakshatra|star|నక్షత్రం)[:\\s-]+", "")
+                .trim();
         return cleaned.isBlank() ? trimmed : cleaned;
     }
 

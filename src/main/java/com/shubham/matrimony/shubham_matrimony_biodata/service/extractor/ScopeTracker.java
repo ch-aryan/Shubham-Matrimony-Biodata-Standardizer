@@ -80,8 +80,6 @@ public class ScopeTracker {
                 && (lowerLine.contains("partner") || lowerLine.contains("preference")
                         || lowerLine.contains("references") || lowerLine.contains("disclaimer")
                         || lowerLine.contains("contact") || lowerLine.contains("contact details")
-                        || lowerLine.contains("native_place") || lowerLine.contains("native place")
-                        || lowerLine.contains("settled_location") || lowerLine.contains("settled location")
                         || lowerLine.contains("జీవిత భాగస్వామి") || lowerLine.contains("జీవిత_భాగస్వామి")
                         || lowerLine.contains("సూచనలు") || lowerLine.contains("గమనిక"))) {
             ctx.inFamilyBlock = false;

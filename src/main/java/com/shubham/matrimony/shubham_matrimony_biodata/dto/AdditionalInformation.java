@@ -86,3 +86,4 @@ public class AdditionalInformation {
                 || !rawNotes.isEmpty();
     }
 }
+

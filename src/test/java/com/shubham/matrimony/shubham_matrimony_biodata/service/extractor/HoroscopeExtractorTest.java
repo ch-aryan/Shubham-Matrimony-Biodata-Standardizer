@@ -76,7 +76,9 @@ public class HoroscopeExtractorTest {
 
         // Should emit evidence for both Rashi and Nakshatram
         assertEquals(2, ctx.evidenceList.size());
-        assertTrue(ctx.evidenceList.stream().anyMatch(e -> e.getField() == BiodataField.RASHI && e.getValue().equals("simha")));
-        assertTrue(ctx.evidenceList.stream().anyMatch(e -> e.getField() == BiodataField.NAKSHATRAM && e.getValue().equals("makha")));
+        assertTrue(ctx.evidenceList.stream()
+                .anyMatch(e -> e.getField() == BiodataField.RASHI && e.getValue().equals("simha")));
+        assertTrue(ctx.evidenceList.stream()
+                .anyMatch(e -> e.getField() == BiodataField.NAKSHATRAM && e.getValue().equals("makha")));
     }
 }

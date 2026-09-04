@@ -20,13 +20,13 @@ public class AdditionalInfoExtractorTest {
     @Test
     public void testPropertiesPreservation() {
         String input = """
-            Name: Ramshetty Vignesh
-            DOB: 19-11-1996
-            Properties:
-            Own house G+1 in Shamshabad - rental income - 25k per month
-            1.200 sq yards plot in Shamshabad
-            2.250 sq yards plot in balnagar
-            """;
+                Name: Ramshetty Vignesh
+                DOB: 19-11-1996
+                Properties:
+                Own house G+1 in Shamshabad - rental income - 25k per month
+                1.200 sq yards plot in Shamshabad
+                2.250 sq yards plot in balnagar
+                """;
 
         ExtractionResultDTO result = parser.parseBiodata(input);
         AdditionalInformation info = result.getProfile().getAdditionalInfo();
@@ -45,14 +45,14 @@ public class AdditionalInfoExtractorTest {
     @Test
     public void testPhysicalTraitsAndHobbies() {
         String input = """
-            Name: Satwik Kotte
-            DOB: 25-07-1997
-            Height: 5'6"
-            Weight: 65 Kgs
-            Complexion: Fair
-            Marital Status: Never Married
-            Hobbies: Reading Books, Playing Cricket
-            """;
+                Name: Satwik Kotte
+                DOB: 25-07-1997
+                Height: 5'6"
+                Weight: 65 Kgs
+                Complexion: Fair
+                Marital Status: Never Married
+                Hobbies: Reading Books, Playing Cricket
+                """;
 
         ExtractionResultDTO result = parser.parseBiodata(input);
         AdditionalInformation info = result.getProfile().getAdditionalInfo();
@@ -72,13 +72,13 @@ public class AdditionalInfoExtractorTest {
     @Test
     public void testVisaAndResidence() {
         String input = """
-            Name: Rohith Varala
-            DOB: 02-02-1992
-            Visa Status: Temporary Resident (TR)
-            Religion: Hindu
-            Mother Tongue: Telugu
-            Residence: Raleigh, North Carolina
-            """;
+                Name: Rohith Varala
+                DOB: 02-02-1992
+                Visa Status: Temporary Resident (TR)
+                Religion: Hindu
+                Mother Tongue: Telugu
+                Residence: Raleigh, North Carolina
+                """;
 
         ExtractionResultDTO result = parser.parseBiodata(input);
         AdditionalInformation info = result.getProfile().getAdditionalInfo();
@@ -93,11 +93,11 @@ public class AdditionalInfoExtractorTest {
     @Test
     public void testGrandparentsPreservation() {
         String input = """
-            Name: Sai Akshay
-            DOB: 03-09-1996
-            Paternal Grandparents: Sri Kotte Chandraiah & Smt. Kotte Buchamma
-            Maternal Grandparents: Sri Kayitha Sambaiah & Smt. Kayitha Amrutha
-            """;
+                Name: Sai Akshay
+                DOB: 03-09-1996
+                Paternal Grandparents: Sri Kotte Chandraiah & Smt. Kotte Buchamma
+                Maternal Grandparents: Sri Kayitha Sambaiah & Smt. Kayitha Amrutha
+                """;
 
         ExtractionResultDTO result = parser.parseBiodata(input);
         AdditionalInformation info = result.getProfile().getAdditionalInfo();

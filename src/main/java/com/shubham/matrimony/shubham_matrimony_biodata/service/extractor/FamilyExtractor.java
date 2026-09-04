@@ -230,30 +230,34 @@ public class FamilyExtractor {
                 || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.NAKSHATRAM
                 || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.QUALIFICATION
                 || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.SALARY
-                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.COMPANY
-                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.NATIVE_PLACE
-                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.CURRENT_LOCATION) {
+                || field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.COMPANY) {
 
             // Outside JSON braces, encountering candidate core fields means family section has ended
             if (ctx.braceDepth <= 0) {
                 ctx.inFamilyBlock = false;
                 ctx.section = ParseContext.FamilySection.NONE;
             }
+            // Candidate core attributes — let candidate extractors handle them
+            return false;
+        }
 
-            if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.NATIVE_PLACE) {
-                if (ctx.profile.getNativePlace() == null || ctx.profile.getNativePlace().isBlank()) {
-                    ctx.profile.setNativePlace(value);
-                }
-                return true;
+        // ── Location and Native Place fields — NEVER exit family block ──
+        if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.NATIVE_PLACE) {
+            if (ctx.profile.getNativePlace() == null || ctx.profile.getNativePlace().isBlank()) {
+                ctx.profile.setNativePlace(value);
             }
-            if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.CURRENT_LOCATION) {
+            return true;
+        }
+
+        if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.CURRENT_LOCATION) {
+            if (!ctx.inFamilyBlock) {
                 if (ctx.profile.getCurrentLocation() == null || ctx.profile.getCurrentLocation().isBlank()) {
                     ctx.profile.setCurrentLocation(value);
                 }
-                return true;
+            } else if (ctx.section == ParseContext.FamilySection.SIBLING) {
+                ctx.profile.getAdditionalInfo().getExtendedFamily().add("Sibling Location: " + value);
             }
-            // Candidate core attributes — let candidate extractors handle them
-            return false;
+            return true;
         }
 
         // ── Inside a family block: route generic fields to the right member ──
@@ -271,12 +275,32 @@ public class FamilyExtractor {
                     return true;
                 }
             } else if (ctx.section == ParseContext.FamilySection.SIBLING) {
-                if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FULL_NAME
-                        && ctx.currentSiblingName == null) {
-                    ctx.currentSiblingName = value;
-                    return true;
+                if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FULL_NAME) {
+                    if (ctx.currentSiblingName == null) {
+                        ctx.currentSiblingName = value;
+                        return true;
+                    } else {
+                        // Sibling name already set (e.g. Spouse Name: Akula Vinayak)
+                        ctx.profile.getAdditionalInfo().getExtendedFamily().add("Spouse: " + value);
+                        return true;
+                    }
                 } else if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.SIBLINGS) {
-                    ctx.siblingEntries.add(value);
+                    // Guard: ignore header noise like "& Marital Status:", fragments like "Elder", "Younger", "Sibling"
+                    String valLower = value.toLowerCase().trim();
+                    if (value.startsWith("&") || valLower.contains("status") || valLower.contains("details")
+                            || valLower.equals("elder") || valLower.equals("younger")
+                            || valLower.equals("sibling") || valLower.equals("siblings")) {
+                        return true;
+                    }
+                    // If it is just a relation string, update current relation instead of polluting entries
+                    String rel = extractSiblingRelation(valLower);
+                    if (rel != null && !"Sibling".equalsIgnoreCase(rel) && !value.contains(",") && !value.matches(".*\\d+.*")) {
+                        ctx.currentSiblingRelation = rel;
+                        return true;
+                    }
+                    if (!ctx.siblingEntries.contains(value)) {
+                        ctx.siblingEntries.add(value);
+                    }
                     return true;
                 }
             }
@@ -316,6 +340,19 @@ public class FamilyExtractor {
      */
     public void flushSibling(List<String> entries, String relation, String name, String job) {
         if (relation != null || name != null || job != null) {
+            // Guard: don't flush if it's only a generic relation with no name and no job
+            if (name == null && job == null) {
+                if (relation == null || relation.isBlank()
+                        || relation.equalsIgnoreCase("Sibling")
+                        || relation.equalsIgnoreCase("Siblings")
+                        || relation.equalsIgnoreCase("Elder")
+                        || relation.equalsIgnoreCase("Younger")
+                        || relation.contains("&")
+                        || relation.toLowerCase().contains("status")
+                        || relation.toLowerCase().contains("details")) {
+                    return;
+                }
+            }
             StringBuilder sb = new StringBuilder();
             if (relation != null) {
                 sb.append(relation);
@@ -332,8 +369,16 @@ public class FamilyExtractor {
                     sb.append(job);
             }
             String entry = sb.toString().trim();
-            if (!entry.isBlank() && !entries.contains(entry)) {
-                entries.add(entry);
+            if (!entry.isBlank()) {
+                // If this full entry has name/job, remove any prior bare relation-only duplicate
+                if (name != null || job != null) {
+                    if (relation != null) {
+                        entries.remove(relation);
+                    }
+                }
+                if (!entries.contains(entry)) {
+                    entries.add(entry);
+                }
             }
         }
     }
@@ -347,6 +392,8 @@ public class FamilyExtractor {
      *         "Sibling")
      */
     public String extractSiblingRelation(String lowerLine) {
+        if (lowerLine == null || lowerLine.isBlank())
+            return null;
         if (lowerLine.contains("brother_in_law") || lowerLine.contains("brother in law"))
             return "Brother-in-law";
         if (lowerLine.contains("sister_in_law") || lowerLine.contains("sister in law"))
@@ -368,6 +415,8 @@ public class FamilyExtractor {
         if (lowerLine.contains("brother") || lowerLine.contains("అన్నదమ్ములు")
                 || lowerLine.contains("సోదరులు"))
             return "Brother";
+        if (lowerLine.contains("status") || lowerLine.contains("details"))
+            return null;
         return "Sibling";
     }
 }

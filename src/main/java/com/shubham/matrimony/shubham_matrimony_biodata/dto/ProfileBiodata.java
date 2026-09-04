@@ -39,6 +39,7 @@ public class ProfileBiodata {
 
     private String siblingsDetails;
 
-    // Additional Non-Canonical Information (Properties, Visas, Grandparents, Physical)
+    // Additional Non-Canonical Information (Properties, Visas, Grandparents,
+    // Physical)
     private AdditionalInformation additionalInfo = new AdditionalInformation();
 }

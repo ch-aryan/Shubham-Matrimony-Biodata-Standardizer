@@ -9,10 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Details of a detected contradiction where multiple non-identical evidence items
+ * Details of a detected contradiction where multiple non-identical evidence
+ * items
  * were found for the same {@link EvidenceKey}.
  *
- * <p>Preserves both the currently resolved primary value and all competing alternatives
+ * <p>
+ * Preserves both the currently resolved primary value and all competing
+ * alternatives
  * so a human operator can quickly verify or pick an alternative in the UI.
  */
 @Data
@@ -31,7 +34,10 @@ public class ConflictRecord {
     @Builder.Default
     private List<String> competingValues = new ArrayList<>();
 
-    /** The full list of conflicting evidence objects with source text and provenance. */
+    /**
+     * The full list of conflicting evidence objects with source text and
+     * provenance.
+     */
     @Builder.Default
     private List<ExtractionResult> competingEvidence = new ArrayList<>();
 }

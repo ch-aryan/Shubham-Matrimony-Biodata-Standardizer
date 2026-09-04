@@ -12,9 +12,12 @@ import java.util.regex.Pattern;
 
 /**
  * Extracts non-canonical matrimonial details (Properties, Grandparents, Visas,
- * Physical attributes, Lifestyle/Hobbies, Marital Status) into {@link AdditionalInformation}.
+ * Physical attributes, Lifestyle/Hobbies, Marital Status) into
+ * {@link AdditionalInformation}.
  *
- * <p>Prevents these valuable domain details from being dropped into {@code unparsedLines},
+ * <p>
+ * Prevents these valuable domain details from being dropped into
+ * {@code unparsedLines},
  * without requiring dozens of new database columns.
  */
 @Component
@@ -48,11 +51,13 @@ public class AdditionalInfoExtractor {
             "(?i)^(?:country)[:\\s-]+([a-z\\s]+)$");
 
     /**
-     * Attempts to extract an additional-info segment or multi-line property/grandparent item.
+     * Attempts to extract an additional-info segment or multi-line
+     * property/grandparent item.
      *
      * @param line sanitized line of text
      * @param ctx  shared parse context
-     * @return {@code true} if this line was captured as additional info; {@code false} otherwise.
+     * @return {@code true} if this line was captured as additional info;
+     *         {@code false} otherwise.
      */
     public boolean tryExtract(String line, ParseContext ctx) {
         String trimmed = line.trim();
@@ -63,22 +68,26 @@ public class AdditionalInfoExtractor {
         AdditionalInformation info = ctx.profile.getAdditionalInfo();
 
         // ── 1. Section Header Detection ───────────────────────────────────────
-        if (lower.matches("(?i)^(properties|property|property\\s*details|assets|property\\s*/\\s*assets\\s*details)[:\\s-]*$")) {
+        if (lower.matches(
+                "(?i)^(properties|property|property\\s*details|assets|property\\s*/\\s*assets\\s*details)[:\\s-]*$")) {
             ctx.inPropertiesBlock = true;
             ctx.inGrandparentsBlock = false;
             return true;
         }
 
-        if (lower.matches("(?i)^(grandparents|grandparents\\s*details|paternal\\s*grandparents?|maternal\\s*grandparents?)[:\\s-]*$")) {
+        if (lower.matches(
+                "(?i)^(grandparents|grandparents\\s*details|paternal\\s*grandparents?|maternal\\s*grandparents?)[:\\s-]*$")) {
             ctx.inGrandparentsBlock = true;
             ctx.inPropertiesBlock = false;
             return true;
         }
 
         // Inline property line: e.g. "Properties: Own house G+1 in Shamshabad..."
-        if (lower.startsWith("properties:") || lower.startsWith("property:") || lower.startsWith("property / assets details:")) {
+        if (lower.startsWith("properties:") || lower.startsWith("property:")
+                || lower.startsWith("property / assets details:")) {
             ctx.inPropertiesBlock = true;
-            String val = trimmed.replaceFirst("(?i)^(?:properties|property|property\\s*/\\s*assets\\s*details)[:\\s-]+", "").trim();
+            String val = trimmed
+                    .replaceFirst("(?i)^(?:property\\s*/\\s*assets\\s*details|properties|property)[:\\s-]+", "").trim();
             if (!val.isBlank()) {
                 info.getProperties().add(val);
                 emitEvidence(ExtractionContext.PROPERTY, val, trimmed, ctx);
@@ -156,8 +165,12 @@ public class AdditionalInfoExtractor {
         m = MARITAL_STATUS_PATTERN.matcher(trimmed);
         if (m.find()) {
             String val = m.group(1).trim();
-            info.setMaritalStatus(val);
-            emitEvidence(ExtractionContext.OTHER, val, trimmed, ctx);
+            if (ctx.inFamilyBlock || ctx.section == ParseContext.FamilySection.SIBLING) {
+                info.getExtendedFamily().add("Marital Status: " + val);
+            } else if (info.getMaritalStatus() == null || info.getMaritalStatus().isBlank()) {
+                info.setMaritalStatus(val);
+                emitEvidence(ExtractionContext.OTHER, val, trimmed, ctx);
+            }
             return true;
         }
 
