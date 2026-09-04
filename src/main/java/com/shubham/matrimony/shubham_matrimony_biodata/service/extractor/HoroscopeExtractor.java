@@ -1,5 +1,9 @@
 package com.shubham.matrimony.shubham_matrimony_biodata.service.extractor;
 
+import com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext;
+import com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod;
+import com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult;
+import com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence;
 import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField;
 
 /**
@@ -11,7 +15,8 @@ import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField;
  *       {@code "Makha nakshatram"} → {@code "Makha"}).</li>
  *   <li>Handles compound horoscope lines where both Rashi and Nakshatram appear in a single segment
  *       (e.g. {@code "Simha rasi, Makha nakshatram"}).</li>
- *   <li>Ensures horoscope values are routed directly to the candidate profile.</li>
+ *   <li>Emits atomic {@link ExtractionResult} evidence into {@link ParseContext#emit} while preserving
+ *       direct profile mutation for backwards compatibility during migration.</li>
  * </ul>
  */
 public class HoroscopeExtractor {
@@ -36,9 +41,7 @@ public class HoroscopeExtractor {
         }
 
         if (field == BiodataField.GOTHRAM) {
-            if (ctx.profile.getGothram() == null || ctx.profile.getGothram().isBlank()) {
-                ctx.profile.setGothram(value.trim());
-            }
+            applyGothram(value, ctx);
             return true;
         }
 
@@ -66,8 +69,18 @@ public class HoroscopeExtractor {
 
     private void setCleanRashi(String value, ParseContext ctx) {
         String cleaned = cleanRashiSuffix(value);
-        if (!cleaned.isBlank() && (ctx.profile.getRashi() == null || ctx.profile.getRashi().isBlank())) {
-            ctx.profile.setRashi(cleaned);
+        if (!cleaned.isBlank()) {
+            if (ctx.profile.getRashi() == null || ctx.profile.getRashi().isBlank()) {
+                ctx.profile.setRashi(cleaned);
+            }
+            ctx.emit(ExtractionResult.builder()
+                    .field(BiodataField.RASHI)
+                    .value(cleaned)
+                    .context(ExtractionContext.CANDIDATE)
+                    .confidence(FieldConfidence.HIGH)
+                    .method(ExtractionMethod.DETERMINISTIC)
+                    .sourceText(value)
+                    .build());
         }
     }
 
@@ -92,8 +105,35 @@ public class HoroscopeExtractor {
 
     private void setCleanNakshatram(String value, ParseContext ctx) {
         String cleaned = cleanNakshatramSuffix(value);
-        if (!cleaned.isBlank() && (ctx.profile.getNakshatram() == null || ctx.profile.getNakshatram().isBlank())) {
-            ctx.profile.setNakshatram(cleaned);
+        if (!cleaned.isBlank()) {
+            if (ctx.profile.getNakshatram() == null || ctx.profile.getNakshatram().isBlank()) {
+                ctx.profile.setNakshatram(cleaned);
+            }
+            ctx.emit(ExtractionResult.builder()
+                    .field(BiodataField.NAKSHATRAM)
+                    .value(cleaned)
+                    .context(ExtractionContext.CANDIDATE)
+                    .confidence(FieldConfidence.HIGH)
+                    .method(ExtractionMethod.DETERMINISTIC)
+                    .sourceText(value)
+                    .build());
+        }
+    }
+
+    private void applyGothram(String value, ParseContext ctx) {
+        String cleaned = cleanGothramSuffix(value);
+        if (!cleaned.isBlank()) {
+            if (ctx.profile.getGothram() == null || ctx.profile.getGothram().isBlank()) {
+                ctx.profile.setGothram(cleaned);
+            }
+            ctx.emit(ExtractionResult.builder()
+                    .field(BiodataField.GOTHRAM)
+                    .value(cleaned)
+                    .context(ExtractionContext.CANDIDATE)
+                    .confidence(FieldConfidence.HIGH)
+                    .method(ExtractionMethod.DETERMINISTIC)
+                    .sourceText(value)
+                    .build());
         }
     }
 
@@ -112,6 +152,15 @@ public class HoroscopeExtractor {
         String cleaned = trimmed.replaceAll("(?i)\\s+(nakshatram|nakshathram|nakhsathram|nakshtram|nakshatra|star|నక్షత్రం)$", "").trim();
         // Remove leading "star:", "nakshatram:", etc. if present
         cleaned = cleaned.replaceAll("(?i)^(nakshatram|nakshathram|nakhsathram|nakshtram|nakshatra|star|నక్షత్రం)[:\\s-]+", "").trim();
+        return cleaned.isBlank() ? trimmed : cleaned;
+    }
+
+    private String cleanGothramSuffix(String val) {
+        String trimmed = val.trim();
+        // Remove trailing "gotram", "gothram", "gotra", "గోత్రం"
+        String cleaned = trimmed.replaceAll("(?i)\\s+(gotram|gothram|gotra|గోత్రం)$", "").trim();
+        // Remove leading "gotram:", "gothram:", etc. if present
+        cleaned = cleaned.replaceAll("(?i)^(gotram|gothram|gotra|గోత్రం)[:\\s-]+", "").trim();
         return cleaned.isBlank() ? trimmed : cleaned;
     }
 }

@@ -38,6 +38,20 @@ public class ParseContext {
     /** Diagnostic warnings produced during parsing (reserved for future use). */
     public final List<String> warnings = new ArrayList<>();
 
+    /** Atomic evidence collected across all extractors for Version 2 Merger. */
+    public final List<com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult> evidenceList = new ArrayList<>();
+
+    /** Current entity scope/ownership in the document (defaults to CANDIDATE). */
+    public com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext currentContext =
+            com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE;
+
+    /** Emits a single piece of extracted evidence to the evidence pool. */
+    public void emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult evidence) {
+        if (evidence != null) {
+            evidenceList.add(evidence);
+        }
+    }
+
     // ── State machine ────────────────────────────────────────────────────────
     /** Whether the parser is currently inside a family details block. */
     public boolean inFamilyBlock = false;
