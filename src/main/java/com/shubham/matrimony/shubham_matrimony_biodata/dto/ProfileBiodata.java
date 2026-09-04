@@ -38,4 +38,7 @@ public class ProfileBiodata {
     private String motherOccupation;
 
     private String siblingsDetails;
+
+    // Additional Non-Canonical Information (Properties, Visas, Grandparents, Physical)
+    private AdditionalInformation additionalInfo = new AdditionalInformation();
 }

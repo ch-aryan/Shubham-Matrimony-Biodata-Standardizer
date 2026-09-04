@@ -42,8 +42,7 @@ public class ParseContext {
     public final List<com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult> evidenceList = new ArrayList<>();
 
     /** Current entity scope/ownership in the document (defaults to CANDIDATE). */
-    public com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext currentContext =
-            com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE;
+    public com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext currentContext = com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE;
 
     /** Emits a single piece of extracted evidence to the evidence pool. */
     public void emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult evidence) {
@@ -55,6 +54,12 @@ public class ParseContext {
     // ── State machine ────────────────────────────────────────────────────────
     /** Whether the parser is currently inside a family details block. */
     public boolean inFamilyBlock = false;
+
+    /** Whether the parser is currently inside a properties / assets block. */
+    public boolean inPropertiesBlock = false;
+
+    /** Whether the parser is currently inside a grandparents block. */
+    public boolean inGrandparentsBlock = false;
 
     /**
      * Which family member is currently in scope (Father / Mother / Sibling / …).

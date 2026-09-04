@@ -6,6 +6,7 @@ import com.shubham.matrimony.shubham_matrimony_biodata.dto.ParseResponse;
 import com.shubham.matrimony.shubham_matrimony_biodata.dto.ParseStatus;
 import com.shubham.matrimony.shubham_matrimony_biodata.dto.ParseWarning;
 import com.shubham.matrimony.shubham_matrimony_biodata.dto.ProfileBiodata;
+import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.AdditionalInfoExtractor;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.ConfidenceScorer;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.EducationExtractor;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.FamilyExtractor;
@@ -77,6 +78,7 @@ public class BiodataParserImplementation implements BiodataServiceParser {
     private final EducationExtractor educationExtractor = new EducationExtractor();
     private final OccupationExtractor occupationExtractor = new OccupationExtractor();
     private final PropertyExtractor propertyExtractor = new PropertyExtractor();
+    private final AdditionalInfoExtractor additionalInfoExtractor = new AdditionalInfoExtractor();
     private final ConfidenceScorer scorer = new ConfidenceScorer(familyExtractor);
     private final InputQualityValidator validator = new InputQualityValidator();
 
@@ -120,6 +122,8 @@ public class BiodataParserImplementation implements BiodataServiceParser {
 
             // ── Stage 2: skip non-data lines ──────────────────────────────────
             if (BiodataParserUtils.isIgnorableLine(sanitized))
+                continue;
+            if (additionalInfoExtractor.tryExtract(sanitized, ctx))
                 continue;
             if (BiodataParserUtils.isConversationalNote(lowerLine)) {
                 ctx.unparsedLines.add(sanitized);
