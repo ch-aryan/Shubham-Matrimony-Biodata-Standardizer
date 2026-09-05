@@ -1,10 +1,5 @@
 package com.shubham.matrimony.shubham_matrimony_biodata.service.extractor;
 
-import com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext;
-import com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod;
-import com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult;
-import com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence;
-import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField;
 import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataLabels;
 
 /**
@@ -32,7 +27,6 @@ public class OccupationExtractor {
      * <p>
      * Strips any leading occupation alias prefix (e.g. {@code "Job - "} or
      * {@code "Profession: "}) so only the clean role title is stored.
-     * <b>Example:</b> {@code "Asst Manager @ CIBC Mellon"}
      *
      * <p>
      * Guards: occupation not yet set, not inside a family block, no colon, no
@@ -44,7 +38,6 @@ public class OccupationExtractor {
      */
     public boolean tryExtractStandalone(String sanitized, String lowerLine, ParseContext ctx) {
         if (ctx.profile.getOccupation() != null
-        if (ctx.hasEvidence(BiodataField.OCCUPATION, ExtractionContext.CANDIDATE)
                 || ctx.inFamilyBlock
                 || sanitized.contains(":")
                 || sanitized.contains(",")
@@ -69,15 +62,10 @@ public class OccupationExtractor {
         ctx.profile.setOccupation(role);
         ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                 .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.OCCUPATION)
-        ctx.emit(ExtractionResult.builder()
-                .field(BiodataField.OCCUPATION)
                 .value(role)
                 .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
                 .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
                 .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
-                .context(ExtractionContext.CANDIDATE)
-                .confidence(FieldConfidence.MEDIUM)
-                .method(ExtractionMethod.HEURISTIC)
                 .sourceText(sanitized)
                 .build());
         if (ctx.profile.getCompany() == null || ctx.profile.getCompany().isBlank()) {
@@ -85,16 +73,10 @@ public class OccupationExtractor {
         }
         ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                 .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.COMPANY)
-
-        ctx.emit(ExtractionResult.builder()
-                .field(BiodataField.COMPANY)
                 .value(parts[1].trim())
                 .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
                 .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
                 .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
-                .context(ExtractionContext.CANDIDATE)
-                .confidence(FieldConfidence.MEDIUM)
-                .method(ExtractionMethod.HEURISTIC)
                 .sourceText(sanitized)
                 .build());
         return true;
@@ -155,17 +137,10 @@ public class OccupationExtractor {
                         ctx.profile.setFatherOccupation(cleanRole);
                         ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                                 .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FATHER_OCCUPATION)
-                    if (!ctx.hasEvidence(BiodataField.FATHER_OCCUPATION, ExtractionContext.FATHER)
-                            && !ctx.hasEvidence(BiodataField.OCCUPATION, ExtractionContext.FATHER)) {
-                        ctx.emit(ExtractionResult.builder()
-                                .field(BiodataField.FATHER_OCCUPATION)
                                 .value(cleanRole)
                                 .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.FATHER)
                                 .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
                                 .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
-                                .context(ExtractionContext.FATHER)
-                                .confidence(FieldConfidence.HIGH)
-                                .method(ExtractionMethod.DETERMINISTIC)
                                 .sourceText(value)
                                 .build());
                     }
@@ -176,17 +151,10 @@ public class OccupationExtractor {
                         ctx.profile.setMotherOccupation(cleanRole);
                         ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                                 .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.MOTHER_OCCUPATION)
-                    if (!ctx.hasEvidence(BiodataField.MOTHER_OCCUPATION, ExtractionContext.MOTHER)
-                            && !ctx.hasEvidence(BiodataField.OCCUPATION, ExtractionContext.MOTHER)) {
-                        ctx.emit(ExtractionResult.builder()
-                                .field(BiodataField.MOTHER_OCCUPATION)
                                 .value(cleanRole)
                                 .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.MOTHER)
                                 .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
                                 .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
-                                .context(ExtractionContext.MOTHER)
-                                .confidence(FieldConfidence.HIGH)
-                                .method(ExtractionMethod.DETERMINISTIC)
                                 .sourceText(value)
                                 .build());
                     }
@@ -196,15 +164,10 @@ public class OccupationExtractor {
                         ctx.currentSiblingJob = cleanRole;
                         ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                                 .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.OCCUPATION)
-                        ctx.emit(ExtractionResult.builder()
-                                .field(BiodataField.OCCUPATION)
                                 .value(cleanRole)
                                 .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.SIBLING)
                                 .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
                                 .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
-                                .context(ExtractionContext.SIBLING)
-                                .confidence(FieldConfidence.HIGH)
-                                .method(ExtractionMethod.DETERMINISTIC)
                                 .sourceText(value)
                                 .build());
                     }
@@ -217,16 +180,10 @@ public class OccupationExtractor {
                 ctx.profile.setOccupation(cleanRole);
                 ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                         .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.OCCUPATION)
-            if (!ctx.hasEvidence(BiodataField.OCCUPATION, ExtractionContext.CANDIDATE)) {
-                ctx.emit(ExtractionResult.builder()
-                        .field(BiodataField.OCCUPATION)
                         .value(cleanRole)
                         .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
                         .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
                         .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
-                        .context(ExtractionContext.CANDIDATE)
-                        .confidence(FieldConfidence.HIGH)
-                        .method(ExtractionMethod.DETERMINISTIC)
                         .sourceText(value)
                         .build());
             }
@@ -235,16 +192,10 @@ public class OccupationExtractor {
                     ctx.profile.setCompany(extractedCompany);
                     ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                             .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.COMPANY)
-                if (!ctx.hasEvidence(BiodataField.COMPANY, ExtractionContext.CANDIDATE)) {
-                    ctx.emit(ExtractionResult.builder()
-                            .field(BiodataField.COMPANY)
                             .value(extractedCompany)
                             .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
                             .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
                             .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
-                            .context(ExtractionContext.CANDIDATE)
-                            .confidence(FieldConfidence.HIGH)
-                            .method(ExtractionMethod.DETERMINISTIC)
                             .sourceText(value)
                             .build());
                 }

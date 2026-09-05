@@ -46,6 +46,12 @@ public class EducationExtractor {
 
         String item = BiodataParserUtils.cleanValue(sanitized);
         if (!item.isBlank() && !item.equals(",")) {
+            String existing = ctx.profile.getQualification();
+            if (existing == null || existing.isBlank()) {
+                ctx.profile.setQualification(item);
+            } else if (!existing.contains(item)) {
+                ctx.profile.setQualification(existing + ", " + item);
+            }
             ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                     .field(BiodataField.QUALIFICATION)
                     .value(item)
@@ -87,6 +93,11 @@ public class EducationExtractor {
                 || lower.startsWith("b.e.") || lower.startsWith("diploma")
                 || lower.startsWith("degree") || lower.startsWith("pgd")
                 || lower.startsWith("pg diploma")) {
+            if (ctx.profile.getQualification() == null || ctx.profile.getQualification().isBlank()) {
+                ctx.profile.setQualification(sanitized);
+            } else if (!ctx.profile.getQualification().contains(sanitized)) {
+                ctx.profile.setQualification(ctx.profile.getQualification() + ", " + sanitized);
+            }
             ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                     .field(BiodataField.QUALIFICATION)
                     .value(sanitized)

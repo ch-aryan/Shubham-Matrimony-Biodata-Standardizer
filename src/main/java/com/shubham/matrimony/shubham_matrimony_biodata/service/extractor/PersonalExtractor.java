@@ -39,7 +39,6 @@ public class PersonalExtractor {
     public boolean tryExtractEarlyHeuristics(String sanitized, String lowerLine, ParseContext ctx) {
         // Standalone height (e.g. "6ft", "5'9", "5.8", "5ft 10in")
         if (ctx.profile.getHeight() == null
-        if (!ctx.hasEvidence(BiodataField.HEIGHT, com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
                 && !sanitized.contains(":")
                 && !sanitized.contains(",")
                 && sanitized.matches(
@@ -66,7 +65,6 @@ public class PersonalExtractor {
             }
             if (ctx.profile.getPlaceOfBirth() == null || ctx.profile.getPlaceOfBirth().isBlank()) {
                 ctx.profile.setPlaceOfBirth(place);
-            if (!ctx.hasEvidence(BiodataField.PLACE_OF_BIRTH, com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)) {
                 ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                         .field(BiodataField.PLACE_OF_BIRTH)
                         .value(place)
@@ -103,8 +101,6 @@ public class PersonalExtractor {
      */
     public boolean tryExtractUnlabeledName(String sanitized, String lowerLine, ParseContext ctx) {
         if (ctx.profile.getFullName() != null || ctx.inFamilyBlock || ctx.braceDepth != 0) {
-        if (ctx.givenName != null || ctx.hasEvidence(BiodataField.FULL_NAME, com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
-                || ctx.inFamilyBlock || ctx.braceDepth != 0) {
             return false;
         }
         if (sanitized.contains(":") || sanitized.contains("-") || sanitized.contains(",")

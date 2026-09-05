@@ -77,6 +77,9 @@ public class HoroscopeExtractor {
     private void setCleanRashi(String value, ParseContext ctx) {
         String cleaned = cleanRashiSuffix(value);
         if (!cleaned.isBlank()) {
+            if (ctx.profile.getRashi() == null || ctx.profile.getRashi().isBlank()) {
+                ctx.profile.setRashi(cleaned);
+            }
             ctx.emit(ExtractionResult.builder()
                     .field(BiodataField.RASHI)
                     .value(cleaned)
@@ -110,6 +113,9 @@ public class HoroscopeExtractor {
     private void setCleanNakshatram(String value, ParseContext ctx) {
         String cleaned = cleanNakshatramSuffix(value);
         if (!cleaned.isBlank()) {
+            if (ctx.profile.getNakshatram() == null || ctx.profile.getNakshatram().isBlank()) {
+                ctx.profile.setNakshatram(cleaned);
+            }
             ctx.emit(ExtractionResult.builder()
                     .field(BiodataField.NAKSHATRAM)
                     .value(cleaned)
@@ -124,6 +130,9 @@ public class HoroscopeExtractor {
     private void applyGothram(String value, ParseContext ctx) {
         String cleaned = cleanGothramSuffix(value);
         if (!cleaned.isBlank()) {
+            if (ctx.profile.getGothram() == null || ctx.profile.getGothram().isBlank()) {
+                ctx.profile.setGothram(cleaned);
+            }
             ctx.emit(ExtractionResult.builder()
                     .field(BiodataField.GOTHRAM)
                     .value(cleaned)
