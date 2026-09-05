@@ -49,4 +49,6 @@ public class ParseResponse {
 
     @Builder.Default
     private List<String> unparsedLines = new ArrayList<>();
+
+    private AiReviewMetadata aiMetadata;
 }
