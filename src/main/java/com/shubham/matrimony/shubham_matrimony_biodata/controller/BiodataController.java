@@ -25,9 +25,12 @@ public class BiodataController {
     private static final int MAX_INPUT_LENGTH = 50_000;
 
     private final BiodataServiceParser biodataService;
+    private final com.shubham.matrimony.shubham_matrimony_biodata.service.inputgate.InputGateService inputGateService;
 
-    public BiodataController(BiodataServiceParser biodataService) {
+    public BiodataController(BiodataServiceParser biodataService,
+                             com.shubham.matrimony.shubham_matrimony_biodata.service.inputgate.InputGateService inputGateService) {
         this.biodataService = biodataService;
+        this.inputGateService = inputGateService;
     }
 
     /**
@@ -58,6 +61,23 @@ public class BiodataController {
 
         // Delegate everything else to the engine
         return ResponseEntity.ok(biodataService.parseAndValidate(request.getRawText(), request.getForceAi()));
+    }
+
+    /**
+     * Multimodal upload endpoint for PDF documents and image files (JPEG, PNG, WEBP).
+     *
+     * <p>Enforces zero-cost local sanity checks (blank/black image rejection, PDF structure/page count,
+     * magic byte validation) before processing.
+     *
+     * @param file uploaded document or image
+     * @param forceAi optional flag to force downstream Gemini semantic review
+     * @return {@link ParseResponse} with status, profile, warnings, and unparsed lines
+     */
+    @PostMapping(value = "/upload", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ParseResponse> upload(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(value = "forceAi", required = false) Boolean forceAi) {
+        return ResponseEntity.ok(inputGateService.processUpload(file, forceAi));
     }
 
     /**

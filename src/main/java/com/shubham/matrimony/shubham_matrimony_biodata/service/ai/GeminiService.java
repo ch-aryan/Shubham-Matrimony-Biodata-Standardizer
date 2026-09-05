@@ -44,6 +44,21 @@ public class GeminiService implements AiExtractionProvider {
         }
     }
 
+    /**
+     * Extracts text verbatim from image or scanned PDF bytes using Gemini Multimodal.
+     *
+     * @param fileBytes raw file bytes
+     * @param mimeType MIME type of the document
+     * @return extracted raw text, or empty if Gemini is unavailable or failed
+     */
+    public Optional<String> extractDocumentText(byte[] fileBytes, String mimeType) {
+        if (!isAvailable()) {
+            log.info("Gemini is not available (disabled or API key missing). Skipping document text extraction.");
+            return Optional.empty();
+        }
+        return geminiClient.extractTextFromMultimodalDocument(fileBytes, mimeType);
+    }
+
     @Override
     public boolean isAvailable() {
         return config.getApi().isEnabled()

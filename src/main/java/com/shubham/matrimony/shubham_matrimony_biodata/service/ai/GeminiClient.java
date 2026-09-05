@@ -90,6 +90,66 @@ public class GeminiClient {
             return Optional.empty();
         }
 
+        return executeRequestWithRetries(url, apiKey, requestBody, timeoutSeconds, maxRetries);
+    }
+
+    /**
+     * Multimodal document text extraction (OCR/document understanding).
+     * Extracts plain text verbatim from image or scanned PDF bytes.
+     *
+     * @param fileBytes raw file bytes
+     * @param mimeType document mime type (e.g. image/jpeg, image/png, application/pdf)
+     * @return extracted plain text, or empty if request failed or was unavailable
+     */
+    public Optional<String> extractTextFromMultimodalDocument(byte[] fileBytes, String mimeType) {
+        String apiKey = config.getApi().getKey();
+        if (apiKey == null || apiKey.isBlank()) {
+            log.warn("Gemini API key is not configured. Skipping multimodal document extraction.");
+            return Optional.empty();
+        }
+
+        String model = config.getApi().getModel();
+        int timeoutSeconds = config.getApi().getTimeoutSeconds();
+        int maxRetries = config.getApi().getMaxRetries();
+
+        String url = GEMINI_API_BASE + model + ":generateContent";
+        String base64Data = java.util.Base64.getEncoder().encodeToString(fileBytes);
+
+        String ocrPrompt = "Extract all text, contact details, horoscope, family details, and tabular information verbatim "
+                + "from this matrimonial biodata document. Preserve line breaks, field labels, and original wording. "
+                + "Do not summarize or format into JSON. Output only the extracted plain text.";
+
+        Map<String, Object> requestPayload = Map.of(
+                "contents", List.of(
+                        Map.of(
+                                "role", "user",
+                                "parts", List.of(
+                                        Map.of("inline_data", Map.of(
+                                                "mime_type", mimeType,
+                                                "data", base64Data
+                                        )),
+                                        Map.of("text", ocrPrompt)
+                                )
+                        )
+                ),
+                "generationConfig", Map.of(
+                        "temperature", 0.0
+                )
+        );
+
+        String requestBody;
+        try {
+            requestBody = objectMapper.writeValueAsString(requestPayload);
+        } catch (Exception e) {
+            log.error("Failed to serialize Gemini multimodal request body", e);
+            return Optional.empty();
+        }
+
+        return executeRequestWithRetries(url, apiKey, requestBody, timeoutSeconds, maxRetries);
+    }
+
+    private Optional<String> executeRequestWithRetries(String url, String apiKey, String requestBody,
+                                                      int timeoutSeconds, int maxRetries) {
         for (int attempt = 0; attempt <= maxRetries; attempt++) {
             try {
                 HttpRequest request = HttpRequest.newBuilder()
