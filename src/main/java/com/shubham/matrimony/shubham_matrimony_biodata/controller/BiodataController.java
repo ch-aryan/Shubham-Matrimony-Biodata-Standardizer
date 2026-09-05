@@ -18,7 +18,8 @@ public class BiodataController {
 
     /**
      * Maximum allowed input size in characters.
-     * A normal WhatsApp biodata is 500–3000 chars. 50K is generous for OCR-extracted PDFs.
+     * A normal WhatsApp biodata is 500–3000 chars. 50K is generous for
+     * OCR-extracted PDFs.
      * If input exceeds this, we reject before parsing — never silently truncate.
      */
     private static final int MAX_INPUT_LENGTH = 50_000;
@@ -32,11 +33,13 @@ public class BiodataController {
     /**
      * Main production endpoint.
      *
-     * <p>Controller validates the HTTP envelope (null, blank, oversized).
+     * <p>
+     * Controller validates the HTTP envelope (null, blank, oversized).
      * Engine validates whether the text is suitable for parsing.
      *
      * @param request JSON body with {@code rawText} field
-     * @return {@link ParseResponse} with status, profile, warnings, and unparsed lines
+     * @return {@link ParseResponse} with status, profile, warnings, and unparsed
+     *         lines
      */
     @PostMapping("/parse")
     public ResponseEntity<ParseResponse> parse(@RequestBody ParseRequest request) {
@@ -60,7 +63,8 @@ public class BiodataController {
 
     /**
      * Lightweight raw-text endpoint for quick dev/testing.
-     * Returns only the populated {@link ProfileBiodata} without validation wrapping.
+     * Returns only the populated {@link ProfileBiodata} without validation
+     * wrapping.
      */
     @PostMapping("/parseraw")
     public ProfileBiodata parseRaw(@RequestBody String rawText) {

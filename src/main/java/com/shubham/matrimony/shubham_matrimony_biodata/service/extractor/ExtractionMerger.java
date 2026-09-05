@@ -16,11 +16,13 @@ import java.util.stream.Collectors;
 /**
  * Reconciles and arbitrates all atomic {@link ExtractionResult} evidence into a
  * canonical {@link ProfileBiodata}.
- * Reconciles and arbitrates all atomic {@link ExtractionResult} evidence into a canonical {@link ProfileBiodata}.
+ * Reconciles and arbitrates all atomic {@link ExtractionResult} evidence into a
+ * canonical {@link ProfileBiodata}.
  *
  * <p>
  * Core Responsibilities:
- * <p>Core Responsibilities:
+ * <p>
+ * Core Responsibilities:
  * <ol>
  * <li><b>Context Isolation:</b> Groups evidence by {@link EvidenceKey} (Context
  * + Field), preventing
@@ -38,15 +40,22 @@ import java.util.stream.Collectors;
  * {@code FULL_NAME} when present.</li>
  * <li><b>Audit Trail:</b> Preserves the full list of evidence per key for
  * transparency.</li>
- *   <li><b>Context Isolation:</b> Groups evidence by {@link EvidenceKey} (Context + Field), preventing
- *       candidate, father, mother, and sibling data from colliding.</li>
- *   <li><b>Value Deduplication:</b> Identical values from different extraction sources are collapsed cleanly.</li>
- *   <li><b>Conflict Arbitration:</b> Detects contradictory values within the same key. Selects a primary
- *       resolution, flags the field as {@link FieldConfidence#CONFLICT}, and preserves competing evidence.</li>
- *   <li><b>Accumulation:</b> Multi-value fields (e.g. {@code QUALIFICATION}, {@code SIBLINGS}) are combined
- *       rather than treated as conflicts.</li>
- *   <li><b>Composite Assembly:</b> Merges candidate {@code SURNAME} and {@code FULL_NAME} when present.</li>
- *   <li><b>Audit Trail:</b> Preserves the full list of evidence per key for transparency.</li>
+ * <li><b>Context Isolation:</b> Groups evidence by {@link EvidenceKey} (Context
+ * + Field), preventing
+ * candidate, father, mother, and sibling data from colliding.</li>
+ * <li><b>Value Deduplication:</b> Identical values from different extraction
+ * sources are collapsed cleanly.</li>
+ * <li><b>Conflict Arbitration:</b> Detects contradictory values within the same
+ * key. Selects a primary
+ * resolution, flags the field as {@link FieldConfidence#CONFLICT}, and
+ * preserves competing evidence.</li>
+ * <li><b>Accumulation:</b> Multi-value fields (e.g. {@code QUALIFICATION},
+ * {@code SIBLINGS}) are combined
+ * rather than treated as conflicts.</li>
+ * <li><b>Composite Assembly:</b> Merges candidate {@code SURNAME} and
+ * {@code FULL_NAME} when present.</li>
+ * <li><b>Audit Trail:</b> Preserves the full list of evidence per key for
+ * transparency.</li>
  * </ol>
  */
 @Component
@@ -55,22 +64,26 @@ public class ExtractionMerger {
     /**
      * Merges a collection of extraction evidence into a cohesive
      * {@link MergeResult}.
-     * Merges a collection of extraction evidence into a cohesive {@link MergeResult}.
+     * Merges a collection of extraction evidence into a cohesive
+     * {@link MergeResult}.
      *
      * @param evidenceList all atomic observations from all extractors
      * @return populated profile, confidence scores, conflict records, and evidence
      *         trail
-     * @return populated profile, confidence scores, conflict records, and evidence trail
+     * @return populated profile, confidence scores, conflict records, and evidence
+     *         trail
      */
     /**
      * Merges a collection of extraction evidence into a cohesive
      * {@link MergeResult}.
-     * Merges a collection of extraction evidence into a cohesive {@link MergeResult}.
+     * Merges a collection of extraction evidence into a cohesive
+     * {@link MergeResult}.
      *
      * @param evidenceList all atomic observations from all extractors
      * @return populated profile, confidence scores, conflict records, and evidence
      *         trail
-     * @return populated profile, confidence scores, conflict records, and evidence trail
+     * @return populated profile, confidence scores, conflict records, and evidence
+     *         trail
      */
     public MergeResult merge(List<ExtractionResult> evidenceList) {
         return merge(evidenceList, new ProfileBiodata());
@@ -81,14 +94,17 @@ public class ExtractionMerger {
      * {@link MergeResult},
      * synthesizing onto the provided base profile (preserving its additionalInfo
      * and any direct fields).
-     * Merges a collection of extraction evidence into a cohesive {@link MergeResult},
-     * synthesizing onto the provided base profile (preserving its additionalInfo and any direct fields).
+     * Merges a collection of extraction evidence into a cohesive
+     * {@link MergeResult},
+     * synthesizing onto the provided base profile (preserving its additionalInfo
+     * and any direct fields).
      *
      * @param evidenceList all atomic observations from all extractors
      * @param baseProfile  existing profile instance or null
      * @return populated profile, confidence scores, conflict records, and evidence
      *         trail
-     * @return populated profile, confidence scores, conflict records, and evidence trail
+     * @return populated profile, confidence scores, conflict records, and evidence
+     *         trail
      */
     public MergeResult merge(List<ExtractionResult> evidenceList, ProfileBiodata baseProfile) {
         ProfileBiodata profile = baseProfile != null ? baseProfile : new ProfileBiodata();
@@ -474,7 +490,8 @@ public class ExtractionMerger {
     private int confidenceRank(FieldConfidence conf) {
         if (conf == null)
             return 0;
-        if (conf == null) return 0;
+        if (conf == null)
+            return 0;
         return switch (conf) {
             case HIGH -> 4;
             case MEDIUM -> 3;
@@ -489,7 +506,8 @@ public class ExtractionMerger {
         for (List<ExtractionResult> list : itemLists) {
             if (list == null)
                 continue;
-            if (list == null) continue;
+            if (list == null)
+                continue;
             for (ExtractionResult item : list) {
                 if (item.getConfidence() == FieldConfidence.HIGH) {
                     return FieldConfidence.HIGH;
@@ -535,15 +553,18 @@ public class ExtractionMerger {
         for (ExtractionResult candidate : items) {
             if (candidate == null || candidate.getValue() == null)
                 continue;
-            if (candidate == null || candidate.getValue() == null) continue;
+            if (candidate == null || candidate.getValue() == null)
+                continue;
             String candVal = candidate.getValue().trim().toLowerCase();
             if (candVal.isBlank())
                 continue;
-            if (candVal.isBlank()) continue;
+            if (candVal.isBlank())
+                continue;
             boolean subsumed = items.stream().anyMatch(other -> {
                 if (other == null || other.getValue() == null)
                     return false;
-                if (other == null || other.getValue() == null) return false;
+                if (other == null || other.getValue() == null)
+                    return false;
                 String otherVal = other.getValue().trim().toLowerCase();
                 return !otherVal.equals(candVal) && otherVal.contains(candVal);
             });
@@ -558,7 +579,8 @@ public class ExtractionMerger {
         for (BiodataField field : BiodataField.values()) {
             if (!field.isCanonical())
                 continue;
-            if (field == BiodataField.SURNAME) continue;
+            if (field == BiodataField.SURNAME)
+                continue;
             String propName = field.getPropertyName();
             String val = field.getGetter().apply(profile);
             if (val == null || val.isBlank()) {
@@ -578,4 +600,3 @@ public class ExtractionMerger {
         }
     }
 }
-
