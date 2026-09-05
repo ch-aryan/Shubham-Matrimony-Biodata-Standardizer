@@ -53,6 +53,7 @@ public class ConfidenceScorer {
      * @param confidenceScores target map to fill with HIGH / MISSING per field
      */
     public ConfidenceScorer(ProfileFinalizer profileFinalizer) {
+        this.familyExtractor = null;
         this.profileFinalizer = profileFinalizer;
     }
 

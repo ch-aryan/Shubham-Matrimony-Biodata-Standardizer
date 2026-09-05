@@ -138,10 +138,19 @@ public class PropertyExtractor {
      * {@code "Visa status - Permanent Resident GC"},
      * {@code "Earnings - $ 130 + Stocks"}) from being lost or requiring rigid
      * schema changes.
+     * <p>
+     * Prevents arbitrary non-canonical fields (e.g.
+     * {@code "Diet: Pure Vegetarian"},
+     * {@code "Requirements :- Only Software Engineer"},
+     * {@code "Visa status - Permanent Resident GC"},
+     * {@code "Earnings - $ 130 + Stocks"}) from being lost or requiring rigid
+     * schema changes.
      *
      * @param line sanitized input line
      * @param ctx  shared parse context
      * @return {@code true} if captured as a key-value attribute; {@code false} otherwise.
+     * @return {@code true} if captured as a key-value attribute; {@code false}
+     *         otherwise.
      * @return {@code true} if captured as a key-value attribute; {@code false}
      *         otherwise.
      */

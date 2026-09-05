@@ -26,9 +26,11 @@ public class AdditionalInfoExtractor {
 
     private static final Pattern WEIGHT_PATTERN = Pattern.compile(
             "(?i)^(?:weight|wt)[:\\s-]+([0-9]+(?:\\.[0-9]+)?\\s*(?:kgs?|lbs?|kilos?)?)");
+            "(?i)^(?:weight)[:\\s-]+(\\d+(?:\\.\\d+)?\\s*(?:kgs?|lbs?|pounds?)?)$");
 
     private static final Pattern COMPLEXION_PATTERN = Pattern.compile(
             "(?i)^(?:complexion|skin\\s*tone)[:\\s-]+([a-z\\s]+)$");
+            "(?i)^(?:complexion|colour|color)[:\\s-]+([a-z\\s/]+)$");
 
     private static final Pattern MARITAL_STATUS_PATTERN = Pattern.compile(
             "(?i)^(?:marital\\s*status)[:\\s-]+([a-z\\s]+)$");
@@ -299,10 +301,25 @@ public class AdditionalInfoExtractor {
                 || lower.startsWith("personal")
                 || lower.startsWith("name:")
                 || lower.startsWith("dob:")
+                || lower.startsWith("name")
+                || lower.startsWith("dob")
                 || lower.startsWith("date of birth")
                 || lower.startsWith("references")
                 || lower.startsWith("contact")
                 || lower.startsWith("disclaimer");
+                || lower.startsWith("disclaimer")
+                || lower.startsWith("weight")
+                || lower.startsWith("complexion")
+                || lower.startsWith("height")
+                || lower.startsWith("marital status")
+                || lower.startsWith("visa")
+                || lower.startsWith("hobbies")
+                || lower.startsWith("religion")
+                || lower.startsWith("mother tongue")
+                || lower.startsWith("residence")
+                || lower.startsWith("country")
+                || lower.startsWith("diet")
+                || lower.startsWith("partner");
     }
 
     private void emitEvidence(ExtractionContext context, String value, String sourceText, ParseContext ctx) {

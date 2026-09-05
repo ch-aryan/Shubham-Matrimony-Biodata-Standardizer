@@ -11,17 +11,13 @@ import java.util.Map;
  * <p>
  * Responsibilities:
  * <ol>
- * <li>Flush the last buffered sibling record (the loop exit may leave one
- * pending).</li>
- * <li>Join all sibling entries into {@code siblingsDetails} if not already
- * set.</li>
- * <li>Merge {@code surname} and {@code givenName} buffers into
- * {@code fullName}.</li>
+ * <li>Flush the last buffered sibling record (the loop exit may leave one pending).</li>
+ * <li>Join all sibling entries into {@code siblingsDetails} if not already set.</li>
+ * <li>Merge {@code surname} and {@code givenName} buffers into {@code fullName}.</li>
  * </ol>
  *
  * <p>
- * Does NOT overwrite field confidence scores. Authoritative confidence scoring
- * and conflict
+ * Does NOT overwrite field confidence scores. Authoritative confidence scoring and conflict
  * detection is performed exclusively by {@link ExtractionMerger}.
  */
 public class ProfileFinalizer {
@@ -33,11 +29,9 @@ public class ProfileFinalizer {
     }
 
     /**
-     * Finalizes the profile in {@code ctx}: flushes pending sibling buffers and
-     * resolves full name.
+     * Finalizes the profile in {@code ctx}: flushes pending sibling buffers and resolves full name.
      *
-     * @param ctx shared parse context (mutated: fullName, siblingsDetails may be
-     *            set)
+     * @param ctx shared parse context (mutated: fullName, siblingsDetails may be set)
      */
     public void finalizeProfile(ParseContext ctx) {
         // Flush the last sibling record that the loop may have left pending
@@ -52,8 +46,7 @@ public class ProfileFinalizer {
         // Merge surname + givenName into fullName
         // Examples:
         // surname="Thota" givenName="Rohan" → "Thota Rohan"
-        // surname="Thota" givenName="Rohan Thota" → "Rohan Thota" (surname already
-        // inside)
+        // surname="Thota" givenName="Rohan Thota" → "Rohan Thota" (surname already inside)
         // givenName="Aryan Kumar" (no surname) → "Aryan Kumar"
         // surname="Kamma" (no givenName) → "Kamma"
         if (ctx.surname != null && !ctx.surname.isBlank()

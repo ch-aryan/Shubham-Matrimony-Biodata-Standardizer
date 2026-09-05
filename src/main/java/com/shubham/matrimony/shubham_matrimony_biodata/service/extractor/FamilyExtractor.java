@@ -619,6 +619,9 @@ public class FamilyExtractor {
     }
 
     private boolean isObviousFatherJob(String val) {
+        if (val == null || val.isBlank()) return false;
+        if (val == null || val.isBlank())
+            return false;
         if (val == null || val.isBlank())
             return false;
         if (val == null || val.isBlank())
@@ -633,6 +636,9 @@ public class FamilyExtractor {
     }
 
     private boolean isObviousMotherJob(String val) {
+        if (val == null || val.isBlank()) return false;
+        if (val == null || val.isBlank())
+            return false;
         if (val == null || val.isBlank())
             return false;
         if (val == null || val.isBlank())
