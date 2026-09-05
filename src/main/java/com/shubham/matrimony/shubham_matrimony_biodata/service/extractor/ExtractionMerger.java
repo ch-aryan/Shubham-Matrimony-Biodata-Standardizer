@@ -14,10 +14,30 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * Reconciles and arbitrates all atomic {@link ExtractionResult} evidence into a
+ * canonical {@link ProfileBiodata}.
  * Reconciles and arbitrates all atomic {@link ExtractionResult} evidence into a canonical {@link ProfileBiodata}.
  *
+ * <p>
+ * Core Responsibilities:
  * <p>Core Responsibilities:
  * <ol>
+ * <li><b>Context Isolation:</b> Groups evidence by {@link EvidenceKey} (Context
+ * + Field), preventing
+ * candidate, father, mother, and sibling data from colliding.</li>
+ * <li><b>Value Deduplication:</b> Identical values from different extraction
+ * sources are collapsed cleanly.</li>
+ * <li><b>Conflict Arbitration:</b> Detects contradictory values within the same
+ * key. Selects a primary
+ * resolution, flags the field as {@link FieldConfidence#CONFLICT}, and
+ * preserves competing evidence.</li>
+ * <li><b>Accumulation:</b> Multi-value fields (e.g. {@code QUALIFICATION},
+ * {@code SIBLINGS}) are combined
+ * rather than treated as conflicts.</li>
+ * <li><b>Composite Assembly:</b> Merges candidate {@code SURNAME} and
+ * {@code FULL_NAME} when present.</li>
+ * <li><b>Audit Trail:</b> Preserves the full list of evidence per key for
+ * transparency.</li>
  *   <li><b>Context Isolation:</b> Groups evidence by {@link EvidenceKey} (Context + Field), preventing
  *       candidate, father, mother, and sibling data from colliding.</li>
  *   <li><b>Value Deduplication:</b> Identical values from different extraction sources are collapsed cleanly.</li>
@@ -33,15 +53,23 @@ import java.util.stream.Collectors;
 public class ExtractionMerger {
 
     /**
+     * Merges a collection of extraction evidence into a cohesive
+     * {@link MergeResult}.
      * Merges a collection of extraction evidence into a cohesive {@link MergeResult}.
      *
      * @param evidenceList all atomic observations from all extractors
+     * @return populated profile, confidence scores, conflict records, and evidence
+     *         trail
      * @return populated profile, confidence scores, conflict records, and evidence trail
      */
     /**
+     * Merges a collection of extraction evidence into a cohesive
+     * {@link MergeResult}.
      * Merges a collection of extraction evidence into a cohesive {@link MergeResult}.
      *
      * @param evidenceList all atomic observations from all extractors
+     * @return populated profile, confidence scores, conflict records, and evidence
+     *         trail
      * @return populated profile, confidence scores, conflict records, and evidence trail
      */
     public MergeResult merge(List<ExtractionResult> evidenceList) {
@@ -49,11 +77,17 @@ public class ExtractionMerger {
     }
 
     /**
+     * Merges a collection of extraction evidence into a cohesive
+     * {@link MergeResult},
+     * synthesizing onto the provided base profile (preserving its additionalInfo
+     * and any direct fields).
      * Merges a collection of extraction evidence into a cohesive {@link MergeResult},
      * synthesizing onto the provided base profile (preserving its additionalInfo and any direct fields).
      *
      * @param evidenceList all atomic observations from all extractors
      * @param baseProfile  existing profile instance or null
+     * @return populated profile, confidence scores, conflict records, and evidence
+     *         trail
      * @return populated profile, confidence scores, conflict records, and evidence trail
      */
     public MergeResult merge(List<ExtractionResult> evidenceList, ProfileBiodata baseProfile) {
@@ -108,6 +142,11 @@ public class ExtractionMerger {
     // ── Private Resolution Methods ───────────────────────────────────────────
 
     private void resolveCandidateName(Map<EvidenceKey, List<ExtractionResult>> trail,
+            ProfileBiodata profile,
+            Map<String, FieldConfidence> confidenceScores,
+            List<ConflictRecord> conflicts) {
+        List<ExtractionResult> surnameEvidence = getEvidence(trail, BiodataField.SURNAME, ExtractionContext.CANDIDATE,
+                ExtractionContext.ROOT);
                                       ProfileBiodata profile,
                                       Map<String, FieldConfidence> confidenceScores,
                                       List<ConflictRecord> conflicts) {
@@ -115,6 +154,10 @@ public class ExtractionMerger {
         List<ExtractionResult> nameEvidence = pruneSubsumedNames(
                 getEvidence(trail, BiodataField.FULL_NAME, ExtractionContext.CANDIDATE, ExtractionContext.ROOT));
 
+        String surname = resolveSingleValue(surnameEvidence, conflicts, BiodataField.SURNAME,
+                ExtractionContext.CANDIDATE);
+        String givenName = resolveSingleValue(nameEvidence, conflicts, BiodataField.FULL_NAME,
+                ExtractionContext.CANDIDATE);
         String surname = resolveSingleValue(surnameEvidence, conflicts, BiodataField.SURNAME, ExtractionContext.CANDIDATE);
         String givenName = resolveSingleValue(nameEvidence, conflicts, BiodataField.FULL_NAME, ExtractionContext.CANDIDATE);
 
@@ -142,6 +185,9 @@ public class ExtractionMerger {
     }
 
     private void resolveCandidateCoreFields(Map<EvidenceKey, List<ExtractionResult>> trail,
+            ProfileBiodata profile,
+            Map<String, FieldConfidence> confidenceScores,
+            List<ConflictRecord> conflicts) {
                                             ProfileBiodata profile,
                                             Map<String, FieldConfidence> confidenceScores,
                                             List<ConflictRecord> conflicts) {
@@ -163,6 +209,8 @@ public class ExtractionMerger {
         };
 
         for (BiodataField field : candidateFields) {
+            List<ExtractionResult> items = getEvidence(trail, field, ExtractionContext.CANDIDATE,
+                    ExtractionContext.ROOT);
             List<ExtractionResult> items = getEvidence(trail, field, ExtractionContext.CANDIDATE, ExtractionContext.ROOT);
             if (items.isEmpty()) {
                 continue;
@@ -183,14 +231,50 @@ public class ExtractionMerger {
                 }
             }
         }
+
+        BiodataField[] additionalFields = {
+                BiodataField.WEIGHT,
+                BiodataField.COMPLEXION,
+                BiodataField.MARITAL_STATUS,
+                BiodataField.VISA_STATUS,
+                BiodataField.RELIGION,
+                BiodataField.MOTHER_TONGUE,
+                BiodataField.RESIDENCE,
+                BiodataField.COUNTRY,
+                BiodataField.HOBBIES,
+                BiodataField.PARTNER_PREFERENCES
+        };
+
+        for (BiodataField field : additionalFields) {
+            List<ExtractionResult> items = getEvidence(trail, field, ExtractionContext.CANDIDATE,
+                    ExtractionContext.CAREER, ExtractionContext.OTHER, ExtractionContext.ROOT);
+            if (items.isEmpty()) {
+                continue;
+            }
+            String resolvedValue = resolveSingleValue(items, conflicts, field, ExtractionContext.CANDIDATE);
+            if (resolvedValue != null && !resolvedValue.isBlank()) {
+                field.getSetter().accept(profile, resolvedValue);
+                FieldConfidence conf = hasConflictForField(conflicts, field, ExtractionContext.CANDIDATE)
+                        ? FieldConfidence.CONFLICT
+                        : highestConfidence(items);
+                confidenceScores.put(field.getPropertyName(), conf);
+            }
+        }
     }
 
     private void resolveFamilyFields(Map<EvidenceKey, List<ExtractionResult>> trail,
+            ProfileBiodata profile,
+            Map<String, FieldConfidence> confidenceScores,
+            List<ConflictRecord> conflicts) {
                                      ProfileBiodata profile,
                                      Map<String, FieldConfidence> confidenceScores,
                                      List<ConflictRecord> conflicts) {
         // Father Name
         List<ExtractionResult> fatherNameItems = getEvidence(trail, BiodataField.FULL_NAME, ExtractionContext.FATHER);
+        fatherNameItems.addAll(getEvidence(trail, BiodataField.FATHER_NAME, ExtractionContext.FATHER,
+                ExtractionContext.FAMILY, ExtractionContext.ROOT));
+        String fatherName = resolveSingleValue(pruneSubsumedNames(fatherNameItems), conflicts, BiodataField.FATHER_NAME,
+                ExtractionContext.FATHER);
         fatherNameItems.addAll(getEvidence(trail, BiodataField.FATHER_NAME, ExtractionContext.FATHER, ExtractionContext.FAMILY, ExtractionContext.ROOT));
         String fatherName = resolveSingleValue(pruneSubsumedNames(fatherNameItems), conflicts, BiodataField.FATHER_NAME, ExtractionContext.FATHER);
         if (fatherName != null && !fatherName.isBlank()) {
@@ -203,10 +287,18 @@ public class ExtractionMerger {
 
         // Father Occupation
         List<ExtractionResult> fatherJobItems = getEvidence(trail, BiodataField.OCCUPATION, ExtractionContext.FATHER);
+        fatherJobItems.addAll(getEvidence(trail, BiodataField.FATHER_OCCUPATION, ExtractionContext.FATHER,
+                ExtractionContext.FAMILY, ExtractionContext.ROOT));
+        String fatherJob = resolveSingleValue(fatherJobItems, conflicts, BiodataField.FATHER_OCCUPATION,
+                ExtractionContext.FATHER);
         fatherJobItems.addAll(getEvidence(trail, BiodataField.FATHER_OCCUPATION, ExtractionContext.FATHER, ExtractionContext.FAMILY, ExtractionContext.ROOT));
         String fatherJob = resolveSingleValue(fatherJobItems, conflicts, BiodataField.FATHER_OCCUPATION, ExtractionContext.FATHER);
         if (fatherJob != null && !fatherJob.isBlank()) {
             profile.setFatherOccupation(fatherJob);
+            FieldConfidence conf = hasConflictForField(conflicts, BiodataField.FATHER_OCCUPATION,
+                    ExtractionContext.FATHER)
+                            ? FieldConfidence.CONFLICT
+                            : highestConfidence(fatherJobItems);
             FieldConfidence conf = hasConflictForField(conflicts, BiodataField.FATHER_OCCUPATION, ExtractionContext.FATHER)
                     ? FieldConfidence.CONFLICT
                     : highestConfidence(fatherJobItems);
@@ -215,6 +307,10 @@ public class ExtractionMerger {
 
         // Mother Name
         List<ExtractionResult> motherNameItems = getEvidence(trail, BiodataField.FULL_NAME, ExtractionContext.MOTHER);
+        motherNameItems.addAll(getEvidence(trail, BiodataField.MOTHER_NAME, ExtractionContext.MOTHER,
+                ExtractionContext.FAMILY, ExtractionContext.ROOT));
+        String motherName = resolveSingleValue(pruneSubsumedNames(motherNameItems), conflicts, BiodataField.MOTHER_NAME,
+                ExtractionContext.MOTHER);
         motherNameItems.addAll(getEvidence(trail, BiodataField.MOTHER_NAME, ExtractionContext.MOTHER, ExtractionContext.FAMILY, ExtractionContext.ROOT));
         String motherName = resolveSingleValue(pruneSubsumedNames(motherNameItems), conflicts, BiodataField.MOTHER_NAME, ExtractionContext.MOTHER);
         if (motherName != null && !motherName.isBlank()) {
@@ -227,10 +323,18 @@ public class ExtractionMerger {
 
         // Mother Occupation
         List<ExtractionResult> motherJobItems = getEvidence(trail, BiodataField.OCCUPATION, ExtractionContext.MOTHER);
+        motherJobItems.addAll(getEvidence(trail, BiodataField.MOTHER_OCCUPATION, ExtractionContext.MOTHER,
+                ExtractionContext.FAMILY, ExtractionContext.ROOT));
+        String motherJob = resolveSingleValue(motherJobItems, conflicts, BiodataField.MOTHER_OCCUPATION,
+                ExtractionContext.MOTHER);
         motherJobItems.addAll(getEvidence(trail, BiodataField.MOTHER_OCCUPATION, ExtractionContext.MOTHER, ExtractionContext.FAMILY, ExtractionContext.ROOT));
         String motherJob = resolveSingleValue(motherJobItems, conflicts, BiodataField.MOTHER_OCCUPATION, ExtractionContext.MOTHER);
         if (motherJob != null && !motherJob.isBlank()) {
             profile.setMotherOccupation(motherJob);
+            FieldConfidence conf = hasConflictForField(conflicts, BiodataField.MOTHER_OCCUPATION,
+                    ExtractionContext.MOTHER)
+                            ? FieldConfidence.CONFLICT
+                            : highestConfidence(motherJobItems);
             FieldConfidence conf = hasConflictForField(conflicts, BiodataField.MOTHER_OCCUPATION, ExtractionContext.MOTHER)
                     ? FieldConfidence.CONFLICT
                     : highestConfidence(motherJobItems);
@@ -239,6 +343,10 @@ public class ExtractionMerger {
     }
 
     private void resolveSiblings(Map<EvidenceKey, List<ExtractionResult>> trail,
+            ProfileBiodata profile,
+            Map<String, FieldConfidence> confidenceScores) {
+        List<ExtractionResult> siblingItems = getEvidence(trail, BiodataField.SIBLINGS, ExtractionContext.SIBLING,
+                ExtractionContext.FAMILY, ExtractionContext.ROOT);
                                  ProfileBiodata profile,
                                  Map<String, FieldConfidence> confidenceScores) {
         List<ExtractionResult> siblingItems = getEvidence(trail, BiodataField.SIBLINGS, ExtractionContext.SIBLING, ExtractionContext.FAMILY, ExtractionContext.ROOT);
@@ -247,6 +355,8 @@ public class ExtractionMerger {
         List<ExtractionResult> siblingNames = getEvidence(trail, BiodataField.FULL_NAME, ExtractionContext.SIBLING);
         for (ExtractionResult sn : siblingNames) {
             String nameVal = sn.getValue() != null ? sn.getValue().trim() : "";
+            if (nameVal.isEmpty())
+                continue;
             if (nameVal.isEmpty()) continue;
             boolean alreadyContained = siblingItems.stream()
                     .anyMatch(item -> item.getValue() != null && item.getValue().contains(nameVal));
@@ -275,6 +385,9 @@ public class ExtractionMerger {
     }
 
     private void resolveAccumulativeField(List<ExtractionResult> items,
+            BiodataField field,
+            ProfileBiodata profile,
+            Map<String, FieldConfidence> confidenceScores) {
                                           BiodataField field,
                                           ProfileBiodata profile,
                                           Map<String, FieldConfidence> confidenceScores) {
@@ -294,6 +407,9 @@ public class ExtractionMerger {
     }
 
     private String resolveSingleValue(List<ExtractionResult> items,
+            List<ConflictRecord> conflicts,
+            BiodataField field,
+            ExtractionContext context) {
                                       List<ConflictRecord> conflicts,
                                       BiodataField field,
                                       ExtractionContext context) {
@@ -322,6 +438,8 @@ public class ExtractionMerger {
         }
 
         // Multiple distinct values -> Genuine Contradiction!
+        // 1. Pick best primary resolution (highest confidence, then longest informative
+        // string)
         // 1. Pick best primary resolution (highest confidence, then longest informative string)
         ExtractionResult bestItem = selectBestEvidence(items);
         String primaryValue = bestItem.getValue().trim();
@@ -354,6 +472,8 @@ public class ExtractionMerger {
     }
 
     private int confidenceRank(FieldConfidence conf) {
+        if (conf == null)
+            return 0;
         if (conf == null) return 0;
         return switch (conf) {
             case HIGH -> 4;
@@ -367,6 +487,8 @@ public class ExtractionMerger {
     private FieldConfidence highestConfidence(List<ExtractionResult>... itemLists) {
         FieldConfidence best = FieldConfidence.LOW;
         for (List<ExtractionResult> list : itemLists) {
+            if (list == null)
+                continue;
             if (list == null) continue;
             for (ExtractionResult item : list) {
                 if (item.getConfidence() == FieldConfidence.HIGH) {
@@ -390,6 +512,8 @@ public class ExtractionMerger {
     }
 
     private List<ExtractionResult> getEvidence(Map<EvidenceKey, List<ExtractionResult>> trail,
+            BiodataField field,
+            ExtractionContext... contexts) {
                                                BiodataField field,
                                                ExtractionContext... contexts) {
         List<ExtractionResult> result = new ArrayList<>();
@@ -409,10 +533,16 @@ public class ExtractionMerger {
         }
         List<ExtractionResult> pruned = new ArrayList<>();
         for (ExtractionResult candidate : items) {
+            if (candidate == null || candidate.getValue() == null)
+                continue;
             if (candidate == null || candidate.getValue() == null) continue;
             String candVal = candidate.getValue().trim().toLowerCase();
+            if (candVal.isBlank())
+                continue;
             if (candVal.isBlank()) continue;
             boolean subsumed = items.stream().anyMatch(other -> {
+                if (other == null || other.getValue() == null)
+                    return false;
                 if (other == null || other.getValue() == null) return false;
                 String otherVal = other.getValue().trim().toLowerCase();
                 return !otherVal.equals(candVal) && otherVal.contains(candVal);
@@ -426,6 +556,8 @@ public class ExtractionMerger {
 
     private void finalizeConfidenceScores(ProfileBiodata profile, Map<String, FieldConfidence> scores) {
         for (BiodataField field : BiodataField.values()) {
+            if (!field.isCanonical())
+                continue;
             if (field == BiodataField.SURNAME) continue;
             String propName = field.getPropertyName();
             String val = field.getGetter().apply(profile);
@@ -439,6 +571,7 @@ public class ExtractionMerger {
 
     private void markAllMissing(Map<String, FieldConfidence> scores) {
         for (BiodataField field : BiodataField.values()) {
+            if (field.isCanonical()) {
             if (field != BiodataField.SURNAME) {
                 scores.put(field.getPropertyName(), FieldConfidence.MISSING);
             }

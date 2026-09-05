@@ -40,4 +40,10 @@ public class ConflictRecord {
      */
     @Builder.Default
     private List<ExtractionResult> competingEvidence = new ArrayList<>();
+
+    /** Optional AI-recommended resolution value. */
+    private String recommendedValue;
+
+    /** Optional rationale behind the AI recommendation. */
+    private String recommendationRationale;
 }

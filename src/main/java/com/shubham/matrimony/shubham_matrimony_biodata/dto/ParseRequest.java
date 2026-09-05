@@ -5,4 +5,5 @@ import lombok.Data;
 @Data
 public class ParseRequest {
     private String rawText;
+    private Boolean forceAi;
 }

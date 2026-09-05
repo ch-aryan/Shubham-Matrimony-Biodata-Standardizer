@@ -55,6 +55,7 @@ public class BiodataController {
 
         // Delegate everything else to the engine
         return ResponseEntity.ok(biodataService.parseAndValidate(request.getRawText()));
+        return ResponseEntity.ok(biodataService.parseAndValidate(request.getRawText(), request.getForceAi()));
     }
 
     /**

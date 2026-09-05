@@ -33,6 +33,8 @@ public class ExtractionResultDTO {
     @Builder.Default
     private List<ExtractionResult> evidenceTrail = new ArrayList<>();
 
+    private AiReviewMetadata aiMetadata;
+
     public boolean hasConflicts() {
         return conflicts != null && !conflicts.isEmpty();
     }

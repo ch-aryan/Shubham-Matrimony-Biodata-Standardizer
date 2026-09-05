@@ -9,5 +9,9 @@ public interface BiodataServiceParser {
 
     ExtractionResultDTO parseBiodata(String rawText);
 
+    ExtractionResultDTO parseBiodata(String rawText, Boolean forceAi);
+
     ParseResponse parseAndValidate(String rawText);
+
+    ParseResponse parseAndValidate(String rawText, Boolean forceAi);
 }

@@ -16,5 +16,7 @@ package com.shubham.matrimony.shubham_matrimony_biodata.dto;
 public enum WarningCategory {
     UNRECOGNIZED_TEXT,
     MISSING_EXPECTED_INFORMATION,
+    LOW_INFORMATION_INPUT,
+    CONFLICT_DETECTED
     LOW_INFORMATION_INPUT
 }

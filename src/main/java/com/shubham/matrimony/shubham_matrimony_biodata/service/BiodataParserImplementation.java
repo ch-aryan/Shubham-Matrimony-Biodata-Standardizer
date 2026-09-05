@@ -199,6 +199,14 @@ public class BiodataParserImplementation implements BiodataServiceParser {
         // ── Stage 8: post-processing ──────────────────────────────────────────
         scorer.finalizeProfile(ctx, confidenceScores);
         MergeResult mergeResult = merger.merge(ctx.evidenceList, ctx.profile);
+        if (mergeResult != null && mergeResult.getConfidenceScores() != null) {
+            confidenceScores.putAll(mergeResult.getConfidenceScores());
+        }
+        if (mergeResult != null && mergeResult.getConflicts() != null) {
+            for (ConflictRecord cr : mergeResult.getConflicts()) {
+                if (cr.getKey() != null && cr.getKey().field() != null) {
+                    confidenceScores.put(cr.getKey().field().getPropertyName(), FieldConfidence.CONFLICT);
+                }
         for (ConflictRecord cr : mergeResult.getConflicts()) {
             if (cr.getKey() != null && cr.getKey().field() != null) {
                 confidenceScores.put(cr.getKey().field().getPropertyName(), FieldConfidence.CONFLICT);
@@ -237,6 +245,8 @@ public class BiodataParserImplementation implements BiodataServiceParser {
                 .status(status)
                 .profile(status == ParseStatus.REJECTED_INPUT ? null : result.getProfile())
                 .confidenceScores(result.getConfidenceScores())
+                .conflicts(result.getConflicts())
+                .evidenceTrail(result.getEvidenceTrail())
                 .warnings(warnings)
                 .unparsedLines(result.getUnparsedLines())
                 .build();
@@ -245,7 +255,11 @@ public class BiodataParserImplementation implements BiodataServiceParser {
     private ExtractionResultDTO buildResult(ParseContext ctx,
             Map<String, FieldConfidence> confidenceScores,
             MergeResult mergeResult) {
+        ProfileBiodata resolvedProfile = (mergeResult != null && mergeResult.getProfile() != null)
+                ? mergeResult.getProfile()
+                : ctx.profile;
         return ExtractionResultDTO.builder()
+                .profile(resolvedProfile)
                 .profile(ctx.profile)
                 .confidenceScores(confidenceScores)
                 .unparsedLines(ctx.unparsedLines)

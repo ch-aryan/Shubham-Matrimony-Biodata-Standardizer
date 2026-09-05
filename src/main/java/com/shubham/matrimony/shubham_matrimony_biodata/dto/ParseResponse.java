@@ -39,6 +39,12 @@ public class ParseResponse {
     private Map<String, FieldConfidence> confidenceScores = new HashMap<>();
 
     @Builder.Default
+    private List<ConflictRecord> conflicts = new ArrayList<>();
+
+    @Builder.Default
+    private List<ExtractionResult> evidenceTrail = new ArrayList<>();
+
+    @Builder.Default
     private List<ParseWarning> warnings = new ArrayList<>();
 
     @Builder.Default
