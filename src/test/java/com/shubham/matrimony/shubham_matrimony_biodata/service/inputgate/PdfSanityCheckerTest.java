@@ -29,11 +29,11 @@ class PdfSanityCheckerTest {
     void testDigitalPdfTextExtractionSuccessful() throws IOException {
         byte[] pdfBytes = createPdfWithText(1,
                 "Name: Satwik Kotte\n" +
-                "Date of Birth: 15-08-1995\n" +
-                "Height: 5ft 10in\n" +
-                "Education: Bachelor of Engineering in Computer Science\n" +
-                "Occupation: Software Engineer\n" +
-                "Native Place: Hyderabad\n");
+                        "Date of Birth: 15-08-1995\n" +
+                        "Height: 5ft 10in\n" +
+                        "Education: Bachelor of Engineering in Computer Science\n" +
+                        "Occupation: Software Engineer\n" +
+                        "Native Place: Hyderabad\n");
 
         PdfSanityChecker.PdfAnalysisResult result = checker.inspectAndExtract(pdfBytes);
 
@@ -48,8 +48,7 @@ class PdfSanityCheckerTest {
     void testExcessivePageCountRejected() throws IOException {
         byte[] largePdfBytes = createBlankPdf(12);
 
-        InputGateException ex = assertThrows(InputGateException.class, () ->
-                checker.inspectAndExtract(largePdfBytes));
+        InputGateException ex = assertThrows(InputGateException.class, () -> checker.inspectAndExtract(largePdfBytes));
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
         assertEquals(WarningCategory.EXCESSIVE_PAGE_COUNT, ex.getCategory());
@@ -58,10 +57,9 @@ class PdfSanityCheckerTest {
 
     @Test
     void testCorruptedPdfPayloadRejected() {
-        byte[] corrupted = new byte[]{0x25, 0x50, 0x44, 0x46, 0x00, 0x11, 0x22}; // broken %PDF stream
+        byte[] corrupted = new byte[] { 0x25, 0x50, 0x44, 0x46, 0x00, 0x11, 0x22 }; // broken %PDF stream
 
-        InputGateException ex = assertThrows(InputGateException.class, () ->
-                checker.inspectAndExtract(corrupted));
+        InputGateException ex = assertThrows(InputGateException.class, () -> checker.inspectAndExtract(corrupted));
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatus());
         assertEquals(WarningCategory.CORRUPTED_DOCUMENT, ex.getCategory());

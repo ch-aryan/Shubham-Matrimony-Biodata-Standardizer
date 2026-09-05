@@ -141,11 +141,17 @@ public class ExtractionMerger {
     private void attachConflictRecommendations(List<ConflictRecord> conflicts,
             List<AiSemanticReviewResult.AiConflictResolution> resolutions) {
         for (ConflictRecord cr : conflicts) {
-            if (cr.getKey() == null || cr.getKey().field() == null) continue;
+            if (cr.getKey() == null || cr.getKey().field() == null)
+                continue;
+            if (cr.getKey() == null || cr.getKey().field() == null)
+                continue;
             String fieldProp = cr.getKey().field().getPropertyName().toLowerCase();
             String fieldEnum = cr.getKey().field().name().toLowerCase();
             for (AiSemanticReviewResult.AiConflictResolution res : resolutions) {
-                if (res.getField() == null) continue;
+                if (res.getField() == null)
+                    continue;
+                if (res.getField() == null)
+                    continue;
                 String resField = res.getField().trim().toLowerCase();
                 if (resField.equals(fieldProp) || resField.equals(fieldEnum)) {
                     cr.setRecommendedValue(res.getRecommendedValue());
@@ -266,6 +272,42 @@ public class ExtractionMerger {
                         : highestConfidence(items);
                 confidenceScores.put(field.getPropertyName(), conf);
             }
+        }
+
+        // Properties & Assets
+        List<ExtractionResult> propItems = getEvidence(trail, BiodataField.PROPERTIES, ExtractionContext.PROPERTY,
+                ExtractionContext.OTHER, ExtractionContext.ROOT);
+        if (!propItems.isEmpty()) {
+            for (ExtractionResult item : propItems) {
+                if (item.getValue() != null && !item.getValue().isBlank()
+                        && !profile.getAdditionalInfo().getProperties().contains(item.getValue().trim())) {
+                    profile.getAdditionalInfo().getProperties().add(item.getValue().trim());
+                }
+            }
+            confidenceScores.put("properties", highestConfidence(propItems));
+        }
+
+        // Grandparents
+        List<ExtractionResult> gpItems = getEvidence(trail, BiodataField.GRANDPARENTS, ExtractionContext.GRANDPARENTS,
+                ExtractionContext.FAMILY, ExtractionContext.OTHER, ExtractionContext.ROOT);
+        if (!gpItems.isEmpty()) {
+            for (ExtractionResult item : gpItems) {
+                if (item.getValue() != null && !item.getValue().isBlank()) {
+                    String val = item.getValue().trim();
+                    if (!profile.getAdditionalInfo().getPaternalGrandparents().contains(val)
+                            && !profile.getAdditionalInfo().getMaternalGrandparents().contains(val)) {
+                        profile.getAdditionalInfo().getPaternalGrandparents().add(val);
+                    }
+                }
+            }
+            confidenceScores.put("grandparents", highestConfidence(gpItems));
+        }
+
+        // Custom Attributes
+        List<ExtractionResult> customItems = getEvidence(trail, BiodataField.CUSTOM_ATTRIBUTE, ExtractionContext.OTHER,
+                ExtractionContext.ROOT, ExtractionContext.CANDIDATE);
+        if (!customItems.isEmpty()) {
+            confidenceScores.put("customAttributes", highestConfidence(customItems));
         }
     }
 

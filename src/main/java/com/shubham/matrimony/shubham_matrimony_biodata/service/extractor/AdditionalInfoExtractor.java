@@ -5,6 +5,7 @@ import com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext;
 import com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod;
 import com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult;
 import com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence;
+import com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField;
 import org.springframework.stereotype.Component;
 
 import java.util.regex.Matcher;
@@ -97,12 +98,21 @@ public class AdditionalInfoExtractor {
 
         // Inline property line: e.g. "Properties: Own house G+1 in Shamshabad..." or "Property/Assets: Well-settled family (₹9 Cr)"
         if (lower.matches("(?i)^(?:properties|property|assets|property\\s*/\\s*assets(?:\\s*details)?)\\s*[:=–—~-].*$")) {
+        // Inline property line: e.g. "Properties: Own house G+1 in Shamshabad..." or
+        // "Property/Assets: Well-settled family (₹9 Cr)"
+        if (lower.matches(
+                "(?i)^(?:properties|property|assets|property\\s*/\\s*assets(?:\\s*details)?)\\s*[:=–—~-].*$")) {
             ctx.inPropertiesBlock = true;
             String val = trimmed
                     .replaceFirst("(?i)^(?:property\\s*/\\s*assets(?:\\s*details)?|properties|property|assets)\\s*[:=–—~-]+", "").trim();
+                    .replaceFirst(
+                            "(?i)^(?:property\\s*/\\s*assets(?:\\s*details)?|properties|property|assets)\\s*[:=–—~-]+",
+                            "")
+                    .trim();
             if (!val.isBlank()) {
                 info.getProperties().add(val);
                 emitEvidence(ExtractionContext.PROPERTY, val, trimmed, ctx);
+                emitEvidence(BiodataField.PROPERTIES, ExtractionContext.PROPERTY, val, trimmed, ctx);
             }
             return true;
         }
@@ -113,6 +123,7 @@ public class AdditionalInfoExtractor {
             if (!val.isBlank()) {
                 info.getPaternalGrandparents().add(val);
                 emitEvidence(ExtractionContext.GRANDPARENTS, val, trimmed, ctx);
+                emitEvidence(BiodataField.GRANDPARENTS, ExtractionContext.GRANDPARENTS, val, trimmed, ctx);
             }
             return true;
         }
@@ -122,6 +133,7 @@ public class AdditionalInfoExtractor {
             if (!val.isBlank()) {
                 info.getMaternalGrandparents().add(val);
                 emitEvidence(ExtractionContext.GRANDPARENTS, val, trimmed, ctx);
+                emitEvidence(BiodataField.GRANDPARENTS, ExtractionContext.GRANDPARENTS, val, trimmed, ctx);
             }
             return true;
         }
@@ -134,6 +146,7 @@ public class AdditionalInfoExtractor {
             } else {
                 info.getProperties().add(trimmed);
                 emitEvidence(ExtractionContext.PROPERTY, trimmed, trimmed, ctx);
+                emitEvidence(BiodataField.PROPERTIES, ExtractionContext.PROPERTY, trimmed, trimmed, ctx);
                 return true;
             }
         }
@@ -151,6 +164,7 @@ public class AdditionalInfoExtractor {
                 }
                 info.getPaternalGrandparents().add(trimmed);
                 emitEvidence(ExtractionContext.GRANDPARENTS, trimmed, trimmed, ctx);
+                emitEvidence(BiodataField.GRANDPARENTS, ExtractionContext.GRANDPARENTS, trimmed, trimmed, ctx);
                 return true;
             }
         }
@@ -166,6 +180,7 @@ public class AdditionalInfoExtractor {
                     info.setPartnerPreferences(existing + "; " + trimmed);
                 }
                 emitEvidence(ExtractionContext.OTHER, trimmed, trimmed, ctx);
+                emitEvidence(BiodataField.PARTNER_PREFERENCES, ExtractionContext.OTHER, trimmed, trimmed, ctx);
                 return true;
             }
         }
@@ -178,6 +193,7 @@ public class AdditionalInfoExtractor {
             String val = m.group(1).trim();
             info.setWeight(val);
             emitEvidence(ExtractionContext.OTHER, val, trimmed, ctx);
+            emitEvidence(BiodataField.WEIGHT, ExtractionContext.OTHER, val, trimmed, ctx);
             return true;
         }
 
@@ -186,6 +202,7 @@ public class AdditionalInfoExtractor {
             String val = m.group(1).trim();
             info.setComplexion(val);
             emitEvidence(ExtractionContext.OTHER, val, trimmed, ctx);
+            emitEvidence(BiodataField.COMPLEXION, ExtractionContext.OTHER, val, trimmed, ctx);
             return true;
         }
 
@@ -197,6 +214,11 @@ public class AdditionalInfoExtractor {
             } else if (info.getMaritalStatus() == null || info.getMaritalStatus().isBlank()) {
                 info.setMaritalStatus(val);
                 emitEvidence(ExtractionContext.OTHER, val, trimmed, ctx);
+            } else {
+                if (info.getMaritalStatus() == null || info.getMaritalStatus().isBlank()) {
+                    info.setMaritalStatus(val);
+                }
+                emitEvidence(BiodataField.MARITAL_STATUS, ExtractionContext.OTHER, val, trimmed, ctx);
             }
             return true;
         }
@@ -206,6 +228,7 @@ public class AdditionalInfoExtractor {
             String val = m.group(1).trim();
             info.setVisaStatus(val);
             emitEvidence(ExtractionContext.CAREER, val, trimmed, ctx);
+            emitEvidence(BiodataField.VISA_STATUS, ExtractionContext.CAREER, val, trimmed, ctx);
             return true;
         }
 
@@ -214,6 +237,7 @@ public class AdditionalInfoExtractor {
             String val = m.group(1).trim();
             info.setHobbies(val);
             emitEvidence(ExtractionContext.OTHER, val, trimmed, ctx);
+            emitEvidence(BiodataField.HOBBIES, ExtractionContext.OTHER, val, trimmed, ctx);
             return true;
         }
 
@@ -222,6 +246,7 @@ public class AdditionalInfoExtractor {
             String val = m.group(1).trim();
             info.setReligion(val);
             emitEvidence(ExtractionContext.OTHER, val, trimmed, ctx);
+            emitEvidence(BiodataField.RELIGION, ExtractionContext.OTHER, val, trimmed, ctx);
             return true;
         }
 
@@ -230,6 +255,7 @@ public class AdditionalInfoExtractor {
             String val = m.group(1).trim();
             info.setMotherTongue(val);
             emitEvidence(ExtractionContext.OTHER, val, trimmed, ctx);
+            emitEvidence(BiodataField.MOTHER_TONGUE, ExtractionContext.OTHER, val, trimmed, ctx);
             return true;
         }
 
@@ -238,6 +264,7 @@ public class AdditionalInfoExtractor {
             String val = m.group(1).trim();
             info.setResidence(val);
             emitEvidence(ExtractionContext.CANDIDATE, val, trimmed, ctx);
+            emitEvidence(BiodataField.RESIDENCE, ExtractionContext.CANDIDATE, val, trimmed, ctx);
             return true;
         }
 
@@ -246,6 +273,7 @@ public class AdditionalInfoExtractor {
             String val = m.group(1).trim();
             info.setCountry(val);
             emitEvidence(ExtractionContext.CANDIDATE, val, trimmed, ctx);
+            emitEvidence(BiodataField.COUNTRY, ExtractionContext.CANDIDATE, val, trimmed, ctx);
             return true;
         }
 
@@ -254,6 +282,7 @@ public class AdditionalInfoExtractor {
             String val = m.group(1).trim();
             info.setPartnerPreferences(val);
             emitEvidence(ExtractionContext.OTHER, val, trimmed, ctx);
+            emitEvidence(BiodataField.PARTNER_PREFERENCES, ExtractionContext.OTHER, val, trimmed, ctx);
             return true;
         }
 
@@ -277,7 +306,11 @@ public class AdditionalInfoExtractor {
     }
 
     private void emitEvidence(ExtractionContext context, String value, String sourceText, ParseContext ctx) {
+
+    private void emitEvidence(BiodataField field, ExtractionContext context, String value, String sourceText,
+            ParseContext ctx) {
         ctx.emit(ExtractionResult.builder()
+                .field(field)
                 .context(context)
                 .value(value)
                 .confidence(FieldConfidence.HIGH)

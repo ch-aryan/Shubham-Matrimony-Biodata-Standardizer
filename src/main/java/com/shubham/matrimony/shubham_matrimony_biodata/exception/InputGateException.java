@@ -5,8 +5,10 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 /**
- * Exception thrown when an input fails Request Security, File Signature, or Local Sanity Checks
- * in the Input Gate prior to calling external services or the deterministic parser.
+ * Exception thrown when an input fails Request Security, File Signature, or
+ * Local Sanity Checks
+ * in the Input Gate prior to calling external services or the deterministic
+ * parser.
  */
 @Getter
 public class InputGateException extends RuntimeException {

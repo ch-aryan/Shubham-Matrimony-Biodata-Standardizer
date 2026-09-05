@@ -389,10 +389,26 @@ public class FamilyExtractor {
 
         // ── Inside a family block: route generic fields to the right member ──
         if (ctx.inFamilyBlock) {
+            if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.SURNAME) {
+                if (ctx.section == ParseContext.FamilySection.MOTHER) {
+                    ctx.profile.getAdditionalInfo().getExtendedFamily().add("Mother's Surname: " + value);
+                } else if (ctx.section == ParseContext.FamilySection.FATHER) {
+                    if (ctx.surname == null || ctx.surname.isBlank()) {
+                        ctx.surname = value;
+                    }
+                } else {
+                    ctx.profile.getAdditionalInfo().getExtendedFamily().add("Family Surname: " + value);
+                }
+                return true;
+            }
             if (ctx.section == ParseContext.FamilySection.FATHER) {
                 if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FULL_NAME
                         && (ctx.profile.getFatherName() == null || ctx.profile.getFatherName().isBlank())) {
                     ctx.profile.setFatherName(value);
+                if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FULL_NAME) {
+                    if (ctx.profile.getFatherName() == null || ctx.profile.getFatherName().isBlank()) {
+                        ctx.profile.setFatherName(value);
+                    }
                     ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                             .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FATHER_NAME)
                             .value(value)
@@ -407,6 +423,10 @@ public class FamilyExtractor {
                 if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FULL_NAME
                         && (ctx.profile.getMotherName() == null || ctx.profile.getMotherName().isBlank())) {
                     ctx.profile.setMotherName(value);
+                if (field == com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.FULL_NAME) {
+                    if (ctx.profile.getMotherName() == null || ctx.profile.getMotherName().isBlank()) {
+                        ctx.profile.setMotherName(value);
+                    }
                     ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                             .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.MOTHER_NAME)
                             .value(value)
@@ -468,6 +488,9 @@ public class FamilyExtractor {
             }
             // Drop any other generic field inside a family block
             return true;
+            // Let any other unrecognized field inside a family block fall through to custom
+            // attributes / unparsed lines
+            return false;
         }
 
         // Candidate-level — let PropertyExtractor handle it
@@ -596,7 +619,10 @@ public class FamilyExtractor {
     }
 
     private boolean isObviousFatherJob(String val) {
-        if (val == null || val.isBlank()) return false;
+        if (val == null || val.isBlank())
+            return false;
+        if (val == null || val.isBlank())
+            return false;
         String lower = val.toLowerCase().trim();
         return lower.startsWith("business") || lower.startsWith("rtd") || lower.startsWith("retired")
                 || lower.startsWith("farmer") || lower.startsWith("govt") || lower.startsWith("private")
@@ -607,7 +633,10 @@ public class FamilyExtractor {
     }
 
     private boolean isObviousMotherJob(String val) {
-        if (val == null || val.isBlank()) return false;
+        if (val == null || val.isBlank())
+            return false;
+        if (val == null || val.isBlank())
+            return false;
         String lower = val.toLowerCase().trim();
         return lower.startsWith("housewife") || lower.startsWith("house wife")
                 || lower.startsWith("homemaker") || lower.startsWith("home maker")

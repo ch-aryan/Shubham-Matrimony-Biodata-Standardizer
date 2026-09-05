@@ -11,7 +11,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 
 /**
- * Performs fast, local sanity checks on image streams (dimensions, contrast, blank/monochromatic detection)
+ * Performs fast, local sanity checks on image streams (dimensions, contrast,
+ * blank/monochromatic detection)
  * before any OCR or external AI calls are dispatched.
  */
 @Slf4j

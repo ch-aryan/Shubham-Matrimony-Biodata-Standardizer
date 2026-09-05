@@ -18,6 +18,7 @@ import com.shubham.matrimony.shubham_matrimony_biodata.service.ai.DeterministicE
 import com.shubham.matrimony.shubham_matrimony_biodata.service.ai.GeminiRoutingPolicy;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.AdditionalInfoExtractor;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.ConfidenceScorer;
+import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.ProfileFinalizer;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.EducationExtractor;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.ExtractionMerger;
 import com.shubham.matrimony.shubham_matrimony_biodata.service.extractor.FamilyExtractor;
@@ -62,6 +63,7 @@ public class BiodataParserImplementation implements BiodataServiceParser {
     private final PropertyExtractor propertyExtractor = new PropertyExtractor();
     private final AdditionalInfoExtractor additionalInfoExtractor = new AdditionalInfoExtractor();
     private final ConfidenceScorer scorer = new ConfidenceScorer(familyExtractor);
+    private final ProfileFinalizer profileFinalizer = new ProfileFinalizer(familyExtractor);
     private final InputQualityValidator validator = new InputQualityValidator();
     private final ExtractionMerger merger = new ExtractionMerger();
 
@@ -111,6 +113,7 @@ public class BiodataParserImplementation implements BiodataServiceParser {
         // Fast-path: blank or null input
         if (rawText == null || rawText.isBlank()) {
             scorer.populateMissingConfidence(confidenceScores);
+            profileFinalizer.populateMissingConfidence(confidenceScores);
             return buildResult(new ParseContext(), confidenceScores, null, null);
         }
 
@@ -198,6 +201,7 @@ public class BiodataParserImplementation implements BiodataServiceParser {
 
         // ── Stage 8: deterministic post-processing & baseline merge ───────────
         scorer.finalizeProfile(ctx, confidenceScores);
+        profileFinalizer.finalizeProfile(ctx);
         MergeResult baselineMerge = merger.merge(ctx.evidenceList, ctx.profile);
         if (baselineMerge != null && baselineMerge.getConfidenceScores() != null) {
             confidenceScores.putAll(baselineMerge.getConfidenceScores());

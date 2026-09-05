@@ -38,7 +38,8 @@ public class GeminiClient {
     }
 
     /**
-     * Package-private constructor for unit testing with custom HttpClient and ObjectMapper.
+     * Package-private constructor for unit testing with custom HttpClient and
+     * ObjectMapper.
      */
     GeminiClient(GeminiConfigProperties config, HttpClient httpClient, ObjectMapper objectMapper) {
         this.config = config;
@@ -50,7 +51,7 @@ public class GeminiClient {
      * Sends prompt to Gemini API configured for structured JSON output.
      *
      * @param systemInstruction instruction establishing role and output format
-     * @param userPrompt data payload and extraction objectives
+     * @param userPrompt        data payload and extraction objectives
      * @return raw JSON response text, or empty if request failed or was rejected
      */
     public Optional<String> generateJson(String systemInstruction, String userPrompt) {
@@ -70,17 +71,12 @@ public class GeminiClient {
                 "contents", List.of(
                         Map.of(
                                 "role", "user",
-                                "parts", List.of(Map.of("text", userPrompt))
-                        )
-                ),
+                                "parts", List.of(Map.of("text", userPrompt)))),
                 "systemInstruction", Map.of(
-                        "parts", List.of(Map.of("text", systemInstruction))
-                ),
+                        "parts", List.of(Map.of("text", systemInstruction))),
                 "generationConfig", Map.of(
                         "temperature", 0.1,
-                        "responseMimeType", "application/json"
-                )
-        );
+                        "responseMimeType", "application/json"));
 
         String requestBody;
         try {
@@ -98,7 +94,8 @@ public class GeminiClient {
      * Extracts plain text verbatim from image or scanned PDF bytes.
      *
      * @param fileBytes raw file bytes
-     * @param mimeType document mime type (e.g. image/jpeg, image/png, application/pdf)
+     * @param mimeType  document mime type (e.g. image/jpeg, image/png,
+     *                  application/pdf)
      * @return extracted plain text, or empty if request failed or was unavailable
      */
     public Optional<String> extractTextFromMultimodalDocument(byte[] fileBytes, String mimeType) {
@@ -126,16 +123,10 @@ public class GeminiClient {
                                 "parts", List.of(
                                         Map.of("inline_data", Map.of(
                                                 "mime_type", mimeType,
-                                                "data", base64Data
-                                        )),
-                                        Map.of("text", ocrPrompt)
-                                )
-                        )
-                ),
+                                                "data", base64Data)),
+                                        Map.of("text", ocrPrompt)))),
                 "generationConfig", Map.of(
-                        "temperature", 0.0
-                )
-        );
+                        "temperature", 0.0));
 
         String requestBody;
         try {
@@ -149,7 +140,7 @@ public class GeminiClient {
     }
 
     private Optional<String> executeRequestWithRetries(String url, String apiKey, String requestBody,
-                                                      int timeoutSeconds, int maxRetries) {
+            int timeoutSeconds, int maxRetries) {
         for (int attempt = 0; attempt <= maxRetries; attempt++) {
             try {
                 HttpRequest request = HttpRequest.newBuilder()
@@ -215,7 +206,8 @@ public class GeminiClient {
     }
 
     static String stripMarkdownFences(String raw) {
-        if (raw == null) return "";
+        if (raw == null)
+            return "";
         String trimmed = raw.trim();
         if (trimmed.startsWith("```json")) {
             trimmed = trimmed.substring(7);

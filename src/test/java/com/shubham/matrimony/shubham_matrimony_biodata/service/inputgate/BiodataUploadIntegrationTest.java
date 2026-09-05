@@ -59,8 +59,7 @@ class BiodataUploadIntegrationTest {
                 "file",
                 "biodata.pdf",
                 "application/pdf",
-                pdfBytes
-        );
+                pdfBytes);
 
         mockMvc.perform(multipart("/api/biodata/upload").file(file))
                 .andExpect(status().isOk())
@@ -76,8 +75,7 @@ class BiodataUploadIntegrationTest {
                 "file",
                 "blank.png",
                 "image/png",
-                whiteImage
-        );
+                whiteImage);
 
         mockMvc.perform(multipart("/api/biodata/upload").file(file))
                 .andExpect(status().isUnprocessableEntity())
@@ -87,13 +85,12 @@ class BiodataUploadIntegrationTest {
 
     @Test
     void testUploadDisguisedExeReturns400InvalidSignature() throws Exception {
-        byte[] exeBytes = new byte[]{'M', 'Z', 0x00, 0x00, 0x01, 0x00};
+        byte[] exeBytes = new byte[] { 'M', 'Z', 0x00, 0x00, 0x01, 0x00 };
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "malicious.pdf",
                 "application/pdf",
-                exeBytes
-        );
+                exeBytes);
 
         mockMvc.perform(multipart("/api/biodata/upload").file(file))
                 .andExpect(status().isBadRequest())
@@ -103,13 +100,12 @@ class BiodataUploadIntegrationTest {
 
     @Test
     void testUploadDocxReturns415UnsupportedMediaType() throws Exception {
-        byte[] docxBytes = new byte[]{'P', 'K', 0x03, 0x04, 0x14, 0x00};
+        byte[] docxBytes = new byte[] { 'P', 'K', 0x03, 0x04, 0x14, 0x00 };
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "biodata.docx",
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                docxBytes
-        );
+                docxBytes);
 
         mockMvc.perform(multipart("/api/biodata/upload").file(file))
                 .andExpect(status().isUnsupportedMediaType())
@@ -124,8 +120,7 @@ class BiodataUploadIntegrationTest {
                 "file",
                 "big_book.pdf",
                 "application/pdf",
-                largePdf
-        );
+                largePdf);
 
         mockMvc.perform(multipart("/api/biodata/upload").file(file))
                 .andExpect(status().isBadRequest())
@@ -140,8 +135,7 @@ class BiodataUploadIntegrationTest {
                 "file",
                 "biodata.txt",
                 "text/plain",
-                biodataText.getBytes(StandardCharsets.UTF_8)
-        );
+                biodataText.getBytes(StandardCharsets.UTF_8));
 
         mockMvc.perform(multipart("/api/biodata/upload").file(file))
                 .andExpect(status().isOk())

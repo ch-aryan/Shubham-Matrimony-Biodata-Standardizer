@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 /**
- * Orchestrates Gemini AI semantic review, prompt building, transport execution, and validation.
+ * Orchestrates Gemini AI semantic review, prompt building, transport execution,
+ * and validation.
  */
 @Slf4j
 @Service
@@ -45,10 +46,11 @@ public class GeminiService implements AiExtractionProvider {
     }
 
     /**
-     * Extracts text verbatim from image or scanned PDF bytes using Gemini Multimodal.
+     * Extracts text verbatim from image or scanned PDF bytes using Gemini
+     * Multimodal.
      *
      * @param fileBytes raw file bytes
-     * @param mimeType MIME type of the document
+     * @param mimeType  MIME type of the document
      * @return extracted raw text, or empty if Gemini is unavailable or failed
      */
     public Optional<String> extractDocumentText(byte[] fileBytes, String mimeType) {
@@ -76,4 +78,3 @@ public class GeminiService implements AiExtractionProvider {
         return config.getApi().getModel();
     }
 }
-

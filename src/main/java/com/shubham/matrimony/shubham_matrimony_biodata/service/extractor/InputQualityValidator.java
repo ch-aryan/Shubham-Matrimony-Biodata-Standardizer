@@ -59,11 +59,18 @@ public class InputQualityValidator {
             List<String> unparsedLines) {
 
         long highCount = countHighFields(confidenceScores);
+        long recognizedCount = countRecognizedFields(confidenceScores);
 
         if (highCount == 0) {
+        if (recognizedCount == 0) {
             return ParseStatus.REJECTED_INPUT;
         }
         if (unparsedLines != null && !unparsedLines.isEmpty()) {
+            return ParseStatus.SUCCESS_WITH_WARNINGS;
+        }
+        boolean hasConflicts = confidenceScores != null && confidenceScores.values().stream()
+                .anyMatch(c -> c == FieldConfidence.CONFLICT);
+        if (hasConflicts) {
             return ParseStatus.SUCCESS_WITH_WARNINGS;
         }
         return ParseStatus.SUCCESS;
@@ -79,6 +86,7 @@ public class InputQualityValidator {
      * <ul>
      * <li>{@link WarningCategory#UNRECOGNIZED_TEXT} with unparsed lines as
      * details</li>
+     * <li>{@link WarningCategory#CONFLICT_DETECTED} if competing values exist</li>
      * <li>{@link WarningCategory#MISSING_EXPECTED_INFORMATION} if &lt;
      * {@value #LOW_FIELD_THRESHOLD}
      * fields recognized (informational only)</li>
@@ -126,9 +134,28 @@ public class InputQualityValidator {
         long highCount = countHighFields(confidenceScores);
         long totalFields = confidenceScores.size();
         if (highCount < LOW_FIELD_THRESHOLD && totalFields > 0) {
+        if (confidenceScores != null) {
+            List<String> conflictFields = confidenceScores.entrySet().stream()
+                    .filter(e -> e.getValue() == FieldConfidence.CONFLICT)
+                    .map(Map.Entry::getKey)
+                    .toList();
+            if (!conflictFields.isEmpty()) {
+                warnings.add(ParseWarning.builder()
+                        .category(WarningCategory.CONFLICT_DETECTED)
+                        .message("Multiple conflicting values detected for field(s): "
+                                + String.join(", ", conflictFields))
+                        .details(new ArrayList<>(conflictFields))
+                        .build());
+            }
+        }
+
+        long recognizedCount = countRecognizedFields(confidenceScores);
+        long totalFields = confidenceScores != null ? confidenceScores.size() : 0;
+        if (recognizedCount < LOW_FIELD_THRESHOLD && totalFields > 0) {
             warnings.add(ParseWarning.builder()
                     .category(WarningCategory.MISSING_EXPECTED_INFORMATION)
                     .message("Only " + highCount + " of " + totalFields
+                    .message("Only " + recognizedCount + " of " + totalFields
                             + " fields were recognized. Please verify the result.")
                     .build());
         }
@@ -137,6 +164,17 @@ public class InputQualityValidator {
     }
 
     private long countHighFields(Map<String, FieldConfidence> confidenceScores) {
+
+    public long countRecognizedFields(Map<String, FieldConfidence> confidenceScores) {
+        if (confidenceScores == null || confidenceScores.isEmpty()) {
+            return 0;
+        }
+        return confidenceScores.values().stream()
+                .filter(c -> c != null && c != FieldConfidence.MISSING)
+                .count();
+    }
+
+    public long countHighFields(Map<String, FieldConfidence> confidenceScores) {
         if (confidenceScores == null || confidenceScores.isEmpty()) {
             return 0;
         }

@@ -23,5 +23,8 @@ public record EvidenceKey(ExtractionContext context, BiodataField field) {
         if (context == null) {
             context = ExtractionContext.ROOT;
         }
+        if (field == null) {
+            throw new IllegalArgumentException("BiodataField cannot be null in EvidenceKey");
+        }
     }
 }

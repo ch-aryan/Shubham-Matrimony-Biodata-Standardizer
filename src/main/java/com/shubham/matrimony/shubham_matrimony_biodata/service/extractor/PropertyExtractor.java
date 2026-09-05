@@ -114,6 +114,14 @@ public class PropertyExtractor {
                     .sourceText(value)
                     .build());
         }
+        ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                .field(field)
+                .value(value)
+                .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)
+                .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC)
+                .sourceText(value)
+                .build());
     }
 
     /**
@@ -123,10 +131,19 @@ public class PropertyExtractor {
      * <p>Prevents arbitrary non-canonical fields (e.g. {@code "Diet: Pure Vegetarian"},
      * {@code "Requirements :- Only Software Engineer"}, {@code "Visa status - Permanent Resident GC"},
      * {@code "Earnings - $ 130 + Stocks"}) from being lost or requiring rigid schema changes.
+     * <p>
+     * Prevents arbitrary non-canonical fields (e.g.
+     * {@code "Diet: Pure Vegetarian"},
+     * {@code "Requirements :- Only Software Engineer"},
+     * {@code "Visa status - Permanent Resident GC"},
+     * {@code "Earnings - $ 130 + Stocks"}) from being lost or requiring rigid
+     * schema changes.
      *
      * @param line sanitized input line
      * @param ctx  shared parse context
      * @return {@code true} if captured as a key-value attribute; {@code false} otherwise.
+     * @return {@code true} if captured as a key-value attribute; {@code false}
+     *         otherwise.
      */
     public boolean tryCaptureCustomAttribute(String line, ParseContext ctx) {
         if (line == null || line.isBlank()) {
@@ -148,17 +165,26 @@ public class PropertyExtractor {
             String key = parts[0].replaceAll("^[\\s\\*\\•\\-\\–\\—#\\.\"]+", "")
                                  .replaceAll("[\\s\\*\\•\\-\\–\\—#\\.\"]+$", "")
                                  .trim();
+                    .replaceAll("[\\s\\*\\•\\-\\–\\—#\\.\"]+$", "")
+                    .trim();
             String val = parts[1].replaceAll("^[\\s:=–—~\\|/\\-\\.\\*\\•#\\)\\]\\}\"\'`]+", "")
                                  .replaceAll("[\\s,\\|;~–—\\-\\.\\*\\•#\\(\\[\\{\\\"\'`]+$", "")
                                  .trim();
+                    .replaceAll("[\\s,\\|;~–—\\-\\.\\*\\•#\\(\\[\\{\\\"\'`]+$", "")
+                    .trim();
 
             if (!key.isBlank() && !val.isBlank() && key.length() <= 50
                     && !key.toLowerCase().contains("http") && !key.contains("/")) {
                 String[] words = key.split("\\s+");
                 if (words.length <= 6 && !key.endsWith(".")) {
                     ctx.profile.getAdditionalInfo().getCustomAttributes().put(key, val);
+                    ctx.profile.getAdditionalInfo().addCustomAttribute(key, val,
+                            com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH,
+                            com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.DETERMINISTIC,
+                            line);
                     ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
                             .field(null)
+                            .field(com.shubham.matrimony.shubham_matrimony_biodata.util.BiodataField.CUSTOM_ATTRIBUTE)
                             .value(val)
                             .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.OTHER)
                             .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.HIGH)

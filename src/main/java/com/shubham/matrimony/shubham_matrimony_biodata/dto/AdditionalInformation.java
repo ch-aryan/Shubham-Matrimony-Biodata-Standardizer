@@ -13,9 +13,20 @@ import java.util.Map;
 /**
  * Encapsulates all non-canonical, extended matrimonial biodata information.
  *
- * <p>Preserves valuable domain details (properties, grandparents, international visas,
- * physical traits, lifestyle, hobbies) in a single structured object without polluting
- * the core 22-field canonical profile or requiring dozens of extra database table columns.
+ * <p>
+ * Preserves valuable domain details (properties, grandparents, international
+ * visas,
+ * physical traits, lifestyle, hobbies) in a single structured object without
+ * polluting
+ * the core 22-field canonical profile or requiring dozens of extra database
+ * table columns.
+ * <p>
+ * Preserves valuable domain details (properties, grandparents, international
+ * visas,
+ * physical traits, lifestyle, hobbies) in a single structured object without
+ * polluting
+ * the core 22-field canonical profile or requiring dozens of extra database
+ * table columns.
  */
 @Data
 @Builder
@@ -58,14 +69,38 @@ public class AdditionalInformation {
     @Builder.Default
     private Map<String, String> customAttributes = new LinkedHashMap<>();
 
+    @Builder.Default
+    private List<CustomAttribute> customAttributeDetails = new ArrayList<>();
+
     // ── Unstructured Notes Preserved Without Loss ────────────────────────────
     @Builder.Default
     private List<String> rawNotes = new ArrayList<>();
 
+    public void addCustomAttribute(String key, String value, FieldConfidence conf, ExtractionMethod method,
+            String sourceText) {
+        if (customAttributes == null) {
+            customAttributes = new LinkedHashMap<>();
+        }
+        customAttributes.put(key, value);
+        if (customAttributeDetails == null) {
+            customAttributeDetails = new ArrayList<>();
+        }
+        customAttributeDetails.add(CustomAttribute.builder()
+                .key(key)
+                .value(value)
+                .confidence(conf)
+                .method(method)
+                .sourceText(sourceText)
+                .build());
+    }
+
     /**
      * Checks if this object contains any preserved information.
      *
-     * @return {@code true} if at least one field or list is populated; {@code false} otherwise.
+     * @return {@code true} if at least one field or list is populated;
+     *         {@code false} otherwise.
+     * @return {@code true} if at least one field or list is populated;
+     *         {@code false} otherwise.
      */
     public boolean hasContent() {
         return !properties.isEmpty()
@@ -83,7 +118,7 @@ public class AdditionalInformation {
                 || hobbies != null
                 || partnerPreferences != null
                 || !customAttributes.isEmpty()
+                || !customAttributeDetails.isEmpty()
                 || !rawNotes.isEmpty();
     }
 }
-

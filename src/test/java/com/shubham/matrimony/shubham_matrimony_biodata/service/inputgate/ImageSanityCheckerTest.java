@@ -26,8 +26,7 @@ class ImageSanityCheckerTest {
     @Test
     void testSolidWhiteImageRejected() throws IOException {
         byte[] whiteImage = createTestImage(400, 400, Color.WHITE, null);
-        InputGateException ex = assertThrows(InputGateException.class, () ->
-                checker.validateImageSanity(whiteImage));
+        InputGateException ex = assertThrows(InputGateException.class, () -> checker.validateImageSanity(whiteImage));
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatus());
         assertEquals(WarningCategory.BLANK_OR_UNREADABLE_IMAGE, ex.getCategory());
@@ -37,8 +36,7 @@ class ImageSanityCheckerTest {
     @Test
     void testSolidBlackImageRejected() throws IOException {
         byte[] blackImage = createTestImage(400, 400, Color.BLACK, null);
-        InputGateException ex = assertThrows(InputGateException.class, () ->
-                checker.validateImageSanity(blackImage));
+        InputGateException ex = assertThrows(InputGateException.class, () -> checker.validateImageSanity(blackImage));
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatus());
         assertEquals(WarningCategory.BLANK_OR_UNREADABLE_IMAGE, ex.getCategory());
@@ -48,8 +46,7 @@ class ImageSanityCheckerTest {
     @Test
     void testTinyImageResolutionRejected() throws IOException {
         byte[] tinyImage = createTestImage(100, 100, Color.WHITE, "Tiny");
-        InputGateException ex = assertThrows(InputGateException.class, () ->
-                checker.validateImageSanity(tinyImage));
+        InputGateException ex = assertThrows(InputGateException.class, () -> checker.validateImageSanity(tinyImage));
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatus());
         assertEquals(WarningCategory.BLANK_OR_UNREADABLE_IMAGE, ex.getCategory());
@@ -64,9 +61,8 @@ class ImageSanityCheckerTest {
 
     @Test
     void testCorruptedImageStreamRejected() {
-        byte[] corruptBytes = new byte[]{0x01, 0x02, 0x03, 0x04, 0x05};
-        InputGateException ex = assertThrows(InputGateException.class, () ->
-                checker.validateImageSanity(corruptBytes));
+        byte[] corruptBytes = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
+        InputGateException ex = assertThrows(InputGateException.class, () -> checker.validateImageSanity(corruptBytes));
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatus());
         assertEquals(WarningCategory.CORRUPTED_DOCUMENT, ex.getCategory());

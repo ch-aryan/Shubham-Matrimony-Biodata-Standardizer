@@ -28,7 +28,7 @@ public class BiodataController {
     private final com.shubham.matrimony.shubham_matrimony_biodata.service.inputgate.InputGateService inputGateService;
 
     public BiodataController(BiodataServiceParser biodataService,
-                             com.shubham.matrimony.shubham_matrimony_biodata.service.inputgate.InputGateService inputGateService) {
+            com.shubham.matrimony.shubham_matrimony_biodata.service.inputgate.InputGateService inputGateService) {
         this.biodataService = biodataService;
         this.inputGateService = inputGateService;
     }
@@ -47,6 +47,8 @@ public class BiodataController {
     @PostMapping("/parse")
     public ResponseEntity<ParseResponse> parse(@RequestBody ParseRequest request) {
 
+    public ResponseEntity<ParseResponse> parse(@jakarta.validation.Valid @RequestBody ParseRequest request) {
+
         // Check 1: is rawText present?
         if (request.getRawText() == null || request.getRawText().isBlank()) {
             return ResponseEntity.badRequest().body(rejectedResponse("Biodata text is required."));
@@ -64,14 +66,18 @@ public class BiodataController {
     }
 
     /**
-     * Multimodal upload endpoint for PDF documents and image files (JPEG, PNG, WEBP).
+     * Multimodal upload endpoint for PDF documents and image files (JPEG, PNG,
+     * WEBP).
      *
-     * <p>Enforces zero-cost local sanity checks (blank/black image rejection, PDF structure/page count,
+     * <p>
+     * Enforces zero-cost local sanity checks (blank/black image rejection, PDF
+     * structure/page count,
      * magic byte validation) before processing.
      *
-     * @param file uploaded document or image
+     * @param file    uploaded document or image
      * @param forceAi optional flag to force downstream Gemini semantic review
-     * @return {@link ParseResponse} with status, profile, warnings, and unparsed lines
+     * @return {@link ParseResponse} with status, profile, warnings, and unparsed
+     *         lines
      */
     @PostMapping(value = "/upload", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ParseResponse> upload(

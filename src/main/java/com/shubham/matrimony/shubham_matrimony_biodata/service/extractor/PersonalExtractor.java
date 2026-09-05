@@ -75,6 +75,15 @@ public class PersonalExtractor {
                         .build());
                 return true;
             }
+            ctx.emit(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult.builder()
+                    .field(BiodataField.PLACE_OF_BIRTH)
+                    .value(place)
+                    .context(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext.CANDIDATE)
+                    .confidence(com.shubham.matrimony.shubham_matrimony_biodata.dto.FieldConfidence.MEDIUM)
+                    .method(com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionMethod.HEURISTIC)
+                    .sourceText(sanitized)
+                    .build());
+            return true;
         }
 
         return false;

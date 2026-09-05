@@ -28,21 +28,22 @@ class MagicByteValidatorTest {
 
     @Test
     void testValidJpegAccepted() {
-        byte[] jpegBytes = new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0x00, 0x10, 'J', 'F', 'I', 'F'};
+        byte[] jpegBytes = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0x00, 0x10, 'J', 'F', 'I',
+                'F' };
         MagicByteValidator.DocumentType type = validator.validate("photo.jpg", jpegBytes);
         assertEquals(MagicByteValidator.DocumentType.JPEG, type);
     }
 
     @Test
     void testValidPngAccepted() {
-        byte[] pngBytes = new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00};
+        byte[] pngBytes = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00 };
         MagicByteValidator.DocumentType type = validator.validate("biodata.png", pngBytes);
         assertEquals(MagicByteValidator.DocumentType.PNG, type);
     }
 
     @Test
     void testValidWebpAccepted() {
-        byte[] webpBytes = new byte[]{
+        byte[] webpBytes = new byte[] {
                 'R', 'I', 'F', 'F', 0x20, 0x00, 0x00, 0x00, 'W', 'E', 'B', 'P', 'V', 'P', '8', ' '
         };
         MagicByteValidator.DocumentType type = validator.validate("document.webp", webpBytes);
@@ -58,9 +59,9 @@ class MagicByteValidatorTest {
 
     @Test
     void testExecutableDisguisedAsPdfRejected() {
-        byte[] mzBytes = new byte[]{'M', 'Z', 0x00, 0x00, 0x01, 0x00};
-        InputGateException ex = assertThrows(InputGateException.class, () ->
-                validator.validate("biodata.pdf", mzBytes));
+        byte[] mzBytes = new byte[] { 'M', 'Z', 0x00, 0x00, 0x01, 0x00 };
+        InputGateException ex = assertThrows(InputGateException.class,
+                () -> validator.validate("biodata.pdf", mzBytes));
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
         assertEquals(WarningCategory.INVALID_FILE_SIGNATURE, ex.getCategory());
@@ -69,9 +70,9 @@ class MagicByteValidatorTest {
 
     @Test
     void testProhibitedExtensionDocxRejected() {
-        byte[] pkBytes = new byte[]{'P', 'K', 0x03, 0x04, 0x14, 0x00};
-        InputGateException ex = assertThrows(InputGateException.class, () ->
-                validator.validate("biodata.docx", pkBytes));
+        byte[] pkBytes = new byte[] { 'P', 'K', 0x03, 0x04, 0x14, 0x00 };
+        InputGateException ex = assertThrows(InputGateException.class,
+                () -> validator.validate("biodata.docx", pkBytes));
 
         assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, ex.getStatus());
         assertEquals(WarningCategory.UNSUPPORTED_MEDIA_TYPE, ex.getCategory());
@@ -81,8 +82,8 @@ class MagicByteValidatorTest {
     @Test
     void testPdfMismatchRejected() {
         byte[] fakePdfBytes = "Random ASCII text without PDF header".getBytes(StandardCharsets.UTF_8);
-        InputGateException ex = assertThrows(InputGateException.class, () ->
-                validator.validate("fake.pdf", fakePdfBytes));
+        InputGateException ex = assertThrows(InputGateException.class,
+                () -> validator.validate("fake.pdf", fakePdfBytes));
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
         assertEquals(WarningCategory.INVALID_FILE_SIGNATURE, ex.getCategory());
@@ -91,8 +92,8 @@ class MagicByteValidatorTest {
 
     @Test
     void testEmptyFileRejected() {
-        InputGateException ex = assertThrows(InputGateException.class, () ->
-                validator.validate("empty.pdf", new byte[0]));
+        InputGateException ex = assertThrows(InputGateException.class,
+                () -> validator.validate("empty.pdf", new byte[0]));
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
         assertEquals(WarningCategory.LOW_INFORMATION_INPUT, ex.getCategory());

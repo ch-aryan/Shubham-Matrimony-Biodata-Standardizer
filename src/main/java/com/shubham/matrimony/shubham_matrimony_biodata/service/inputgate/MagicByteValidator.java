@@ -11,7 +11,8 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * Validates file magic bytes and detects spoofed extensions or unsupported binary formats.
+ * Validates file magic bytes and detects spoofed extensions or unsupported
+ * binary formats.
  */
 @Component
 public class MagicByteValidator {
@@ -36,27 +37,27 @@ public class MagicByteValidator {
 
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("pdf", "jpg", "jpeg", "png", "webp", "txt");
     private static final Set<String> PROHIBITED_EXTENSIONS = Set.of(
-            "docx", "doc", "zip", "rar", "7z", "tar", "gz", "exe", "dll", "bat", "sh", "bin", "iso"
-    );
+            "docx", "doc", "zip", "rar", "7z", "tar", "gz", "exe", "dll", "bat", "sh", "bin", "iso");
 
     // Magic byte definitions
-    private static final byte[] PDF_MAGIC = new byte[]{0x25, 0x50, 0x44, 0x46}; // %PDF
-    private static final byte[] JPEG_MAGIC = new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
-    private static final byte[] PNG_MAGIC = new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
-    private static final byte[] RIFF_MAGIC = new byte[]{0x52, 0x49, 0x46, 0x46}; // RIFF
-    private static final byte[] WEBP_MAGIC = new byte[]{0x57, 0x45, 0x42, 0x50}; // WEBP
+    private static final byte[] PDF_MAGIC = new byte[] { 0x25, 0x50, 0x44, 0x46 }; // %PDF
+    private static final byte[] JPEG_MAGIC = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF };
+    private static final byte[] PNG_MAGIC = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+    private static final byte[] RIFF_MAGIC = new byte[] { 0x52, 0x49, 0x46, 0x46 }; // RIFF
+    private static final byte[] WEBP_MAGIC = new byte[] { 0x57, 0x45, 0x42, 0x50 }; // WEBP
 
     // Prohibited binary signatures
-    private static final byte[] ZIP_MAGIC = new byte[]{0x50, 0x4B, 0x03, 0x04}; // PK.. (ZIP, DOCX, XLSX)
-    private static final byte[] EXE_MAGIC = new byte[]{0x4D, 0x5A}; // MZ (DOS/PE executable)
-    private static final byte[] ELF_MAGIC = new byte[]{0x7F, 0x45, 0x4C, 0x46}; // ELF executable
-    private static final byte[] RAR_MAGIC = new byte[]{0x52, 0x61, 0x72, 0x21}; // Rar!
+    private static final byte[] ZIP_MAGIC = new byte[] { 0x50, 0x4B, 0x03, 0x04 }; // PK.. (ZIP, DOCX, XLSX)
+    private static final byte[] EXE_MAGIC = new byte[] { 0x4D, 0x5A }; // MZ (DOS/PE executable)
+    private static final byte[] ELF_MAGIC = new byte[] { 0x7F, 0x45, 0x4C, 0x46 }; // ELF executable
+    private static final byte[] RAR_MAGIC = new byte[] { 0x52, 0x61, 0x72, 0x21 }; // Rar!
 
     /**
-     * Inspects filename and raw bytes to determine DocumentType or reject invalid/spoofed inputs.
+     * Inspects filename and raw bytes to determine DocumentType or reject
+     * invalid/spoofed inputs.
      *
      * @param originalFilename client provided filename
-     * @param bytes raw file payload
+     * @param bytes            raw file payload
      * @return validated DocumentType
      */
     public DocumentType validate(String originalFilename, byte[] bytes) {
@@ -161,7 +162,8 @@ public class MagicByteValidator {
     }
 
     private boolean isWebp(byte[] bytes) {
-        if (bytes.length < 12) return false;
+        if (bytes.length < 12)
+            return false;
         return startsWith(bytes, RIFF_MAGIC) &&
                 bytes[8] == WEBP_MAGIC[0] &&
                 bytes[9] == WEBP_MAGIC[1] &&
@@ -170,7 +172,8 @@ public class MagicByteValidator {
     }
 
     private boolean isPlainText(byte[] bytes) {
-        // Sample up to first 2048 bytes; check for null bytes or excessive control chars
+        // Sample up to first 2048 bytes; check for null bytes or excessive control
+        // chars
         int checkLen = Math.min(bytes.length, 2048);
         int controlCharCount = 0;
         for (int i = 0; i < checkLen; i++) {
@@ -186,9 +189,11 @@ public class MagicByteValidator {
     }
 
     private boolean startsWith(byte[] array, byte[] prefix) {
-        if (array.length < prefix.length) return false;
+        if (array.length < prefix.length)
+            return false;
         for (int i = 0; i < prefix.length; i++) {
-            if (array[i] != prefix[i]) return false;
+            if (array[i] != prefix[i])
+                return false;
         }
         return true;
     }

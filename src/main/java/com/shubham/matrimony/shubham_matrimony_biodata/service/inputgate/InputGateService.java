@@ -38,7 +38,7 @@ public class InputGateService {
     /**
      * Ingests, validates, extracts raw text, and invokes the parsing pipeline.
      *
-     * @param file uploaded document/image file
+     * @param file    uploaded document/image file
      * @param forceAi whether to force AI downstream semantic review
      * @return populated {@link ParseResponse}
      */
@@ -88,8 +88,9 @@ public class InputGateService {
                 imageSanityChecker.validateImageSanity(bytes);
                 rawText = extractViaMultimodal(bytes, docType.getMimeType());
             }
-            default -> throw new InputGateException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, WarningCategory.UNSUPPORTED_MEDIA_TYPE,
-                    "Unsupported document format: " + docType);
+            default ->
+                throw new InputGateException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, WarningCategory.UNSUPPORTED_MEDIA_TYPE,
+                        "Unsupported document format: " + docType);
         }
 
         if (rawText == null || rawText.isBlank()) {

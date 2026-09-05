@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 /**
- * Validates PDF structure and page count limits, and extracts digital text locally at zero cost.
+ * Validates PDF structure and page count limits, and extracts digital text
+ * locally at zero cost.
  */
 @Slf4j
 @Component
@@ -31,7 +32,8 @@ public class PdfSanityChecker {
     }
 
     /**
-     * Inspects PDF bytes, enforces page limits, and attempts local digital text extraction.
+     * Inspects PDF bytes, enforces page limits, and attempts local digital text
+     * extraction.
      *
      * @param pdfBytes raw PDF payload
      * @return analysis result containing page count and extracted text (if digital)

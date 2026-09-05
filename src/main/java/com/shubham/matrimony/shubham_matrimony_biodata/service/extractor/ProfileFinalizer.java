@@ -9,7 +9,7 @@ import java.util.Map;
  * Post-processing phase executed after the main parse loop completes.
  *
  * <p>
- * Responsibilities (in order):
+ * Responsibilities:
  * <ol>
  * <li>Flush the last buffered sibling record (the loop exit may leave one
  * pending).</li>
@@ -17,47 +17,29 @@ import java.util.Map;
  * set.</li>
  * <li>Merge {@code surname} and {@code givenName} buffers into
  * {@code fullName}.</li>
- * <li>Compute a {@link FieldConfidence} map: HIGH when a field value is
- * present,
- * MISSING otherwise.</li>
  * </ol>
  *
  * <p>
- * Also provides {@link #populateMissingConfidence} used as a fast-path when the
- * raw input is blank or null.
- * 
- * @deprecated Replaced by {@link ProfileFinalizer} and
- *             {@link ExtractionMerger}.
- *             Authoritative confidence scoring is handled by
- *             {@link ExtractionMerger}.
+ * Does NOT overwrite field confidence scores. Authoritative confidence scoring
+ * and conflict
+ * detection is performed exclusively by {@link ExtractionMerger}.
  */
-@Deprecated
-public class ConfidenceScorer {
+public class ProfileFinalizer {
 
     private final FamilyExtractor familyExtractor;
-    private final ProfileFinalizer profileFinalizer;
 
-    /**
-     * @param familyExtractor used to flush the last sibling record
-     */
-    public ConfidenceScorer(FamilyExtractor familyExtractor) {
+    public ProfileFinalizer(FamilyExtractor familyExtractor) {
         this.familyExtractor = familyExtractor;
-        this.profileFinalizer = new ProfileFinalizer(familyExtractor);
     }
 
     /**
-     * Finalizes the profile in {@code ctx} and populates {@code confidenceScores}.
+     * Finalizes the profile in {@code ctx}: flushes pending sibling buffers and
+     * resolves full name.
      *
-     * @param ctx              shared parse context (mutated: fullName,
-     *                         siblingsDetails may be set)
-     * @param confidenceScores target map to fill with HIGH / MISSING per field
+     * @param ctx shared parse context (mutated: fullName, siblingsDetails may be
+     *            set)
      */
-    public ConfidenceScorer(ProfileFinalizer profileFinalizer) {
-        this.profileFinalizer = profileFinalizer;
-    }
-
-    public void finalizeProfile(ParseContext ctx, Map<String, FieldConfidence> confidenceScores) {
-
+    public void finalizeProfile(ParseContext ctx) {
         // Flush the last sibling record that the loop may have left pending
         familyExtractor.flushCurrentSibling(ctx);
 
@@ -86,21 +68,6 @@ public class ConfidenceScorer {
         } else if (ctx.surname != null && !ctx.surname.isBlank()) {
             ctx.profile.setFullName(ctx.surname);
         }
-
-        // Compute confidence scores for every canonical field
-        for (BiodataField field : BiodataField.values()) {
-            if (field == BiodataField.SURNAME) {
-                // SURNAME is an internal helper — it surfaces under fullName
-                continue;
-            }
-            String val = field.getGetter().apply(ctx.profile);
-            if (val != null && !val.isBlank()) {
-                confidenceScores.put(field.getPropertyName(), FieldConfidence.HIGH);
-            } else {
-                confidenceScores.put(field.getPropertyName(), FieldConfidence.MISSING);
-            }
-        }
-        profileFinalizer.finalizeProfile(ctx);
     }
 
     /**
@@ -111,10 +78,9 @@ public class ConfidenceScorer {
      */
     public void populateMissingConfidence(Map<String, FieldConfidence> confidenceScores) {
         for (BiodataField field : BiodataField.values()) {
-            if (field != BiodataField.SURNAME) {
+            if (field.isCanonical() && field != BiodataField.SURNAME) {
                 confidenceScores.put(field.getPropertyName(), FieldConfidence.MISSING);
             }
         }
-        profileFinalizer.populateMissingConfidence(confidenceScores);
     }
 }

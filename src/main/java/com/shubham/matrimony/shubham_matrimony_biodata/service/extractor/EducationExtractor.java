@@ -136,8 +136,10 @@ public class EducationExtractor {
             if (beforeBracket.toLowerCase().contains(alias)) {
                 ctx.inArrayField = BiodataField.QUALIFICATION;
                 break;
+                return true; // skip the bracket-open line for education array
             }
         }
         return true; // always skip the bracket-open line itself
+        return false;
     }
 }
