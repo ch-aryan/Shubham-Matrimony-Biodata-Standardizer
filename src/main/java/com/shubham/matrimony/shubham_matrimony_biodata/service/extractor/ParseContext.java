@@ -51,6 +51,39 @@ public class ParseContext {
         }
     }
 
+    /** Checks if any evidence has been emitted for the given field in any context. */
+    public boolean hasEvidence(BiodataField field) {
+        if (field == null) return false;
+        for (com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult e : evidenceList) {
+            if (e != null && e.getField() == field && e.getValue() != null && !e.getValue().isBlank()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Checks if evidence has been emitted for the given field in the specified context. */
+    public boolean hasEvidence(BiodataField field, com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext context) {
+        if (field == null) return false;
+        for (com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult e : evidenceList) {
+            if (e != null && e.getField() == field && e.getContext() == context && e.getValue() != null && !e.getValue().isBlank()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Retrieves the first observed non-blank value for the given field and context. */
+    public String getFirstEvidenceValue(BiodataField field, com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionContext context) {
+        if (field == null) return null;
+        for (com.shubham.matrimony.shubham_matrimony_biodata.dto.ExtractionResult e : evidenceList) {
+            if (e != null && e.getField() == field && e.getContext() == context && e.getValue() != null && !e.getValue().isBlank()) {
+                return e.getValue();
+            }
+        }
+        return null;
+    }
+
     // ── State machine ────────────────────────────────────────────────────────
     /** Whether the parser is currently inside a family details block. */
     public boolean inFamilyBlock = false;
